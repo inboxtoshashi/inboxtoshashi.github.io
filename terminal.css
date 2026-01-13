@@ -2,7 +2,7 @@
 .terminal-content {
     background: #1e1e1e;
     font-family: 'Courier New', monospace;
-    padding: 16px;
+    padding: 10px 16px; /* reduce top/bottom padding so content sits closer to the title bar */
     height: 100%;
     width: 100%;
     min-height: 100%;
@@ -13,8 +13,10 @@
 }
 
 .terminal-output {
-    flex: 1;
+    /* don't force the output area to stretch — let it size to content so the prompt follows immediately */
+    flex: 0 1 auto;
     overflow-y: auto;
+    margin-bottom: 6px;
 }
 
 .terminal-line {

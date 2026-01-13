@@ -1,0 +1,424 @@
+/* About-specific styles extracted from styles.css
+   Contains layout and presentation for About panes (Skills, Education,
+   Projects, Certifications, Experience). Keeping these here makes maintenance
+   easier and keeps component styles isolated. */
+
+/* Ensure consistent spacing for section headers inside About panes */
+.about-pane h2 {
+    /* Center section titles and match Skills header sizing */
+    margin: 12px 0 18px;
+    font-size: 34px;
+    line-height: 1.05;
+    text-align: center;
+    font-weight: 800;
+}
+
+/* Add spacing for the introductory paragraph under About */
+.about-pane[data-pane="about"] > p {
+    margin-top: 8px;
+    margin-bottom: 28px;
+    font-size: 18px;
+    line-height: 1.6;
+    max-width: 980px;
+}
+
+/* Education list: aligned dot + title + meta */
+.about-pane .education-list {
+    list-style: none;
+    margin: 10px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.about-pane .education-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+.about-pane .education-list .edu-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #6ea8ff;
+    margin-top: 4px;
+    flex: 0 0 12px;
+}
+.about-pane .education-list .edu-body .edu-title {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 18px;
+}
+.about-pane .education-list .edu-body .edu-meta {
+    color: #cfcfcf;
+    margin-top: 6px;
+    font-size: 15px;
+}
+.about-pane .education-list li::before {
+    display: none; /* disable the generic about-pane list dot for education entries */
+}
+
+/* Generic About lists (projects, experience, certifications) */
+.about-pane ul {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0; /* use custom bullets */
+}
+.about-pane ul li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 12px;
+}
+.about-pane ul li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6ea8ff;
+    opacity: 0.95;
+}
+
+.about-pane a {
+    color: #cfe8ff; /* soft light-blue */
+    text-decoration: none;
+    font-weight: 600;
+}
+.about-pane a:hover {
+    color: #9ed0ff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Detailed skills list inside About */
+.about-pane .skills-detailed {
+    list-style: none;
+    margin: 12px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.about-pane .skills-detailed li {
+    position: relative;
+    padding-left: 26px;
+    color: #dcdcdc;
+    line-height: 1.45;
+}
+.about-pane .skills-detailed li::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6ea8ff;
+}
+.about-pane .skills-detailed strong {
+    display: inline-block;
+    min-width: 220px;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+@media (max-width: 720px) {
+    .about-pane .skills-detailed strong { min-width: 140px; display:block; margin-bottom:6px; }
+}
+
+/* Optional skills grid (kept here for a future card/pill layout) */
+.about-pane .skills-list {
+    list-style: none;
+    margin: 10px 0 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+}
+.about-pane .skills-list li {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+    position: relative;
+.about-pane .skill-badges .skill-badge { padding:8px 14px; font-size:15px; }
+    padding-left: 18px; /* space for dot */
+}
+.about-pane .skills-list li::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 14px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(180deg,#7fb3ff,#4d90ff);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+}
+.about-pane .skill-title {
+    font-weight: 700;
+    color: #ffffff;
+    min-width: 160px;
+    flex: 0 0 160px;
+}
+.about-pane .skill-desc {
+    color: #cfcfcf;
+    line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+    .about-pane .skills-list { grid-template-columns: 1fr; }
+    .about-pane .skill-title { flex: 0 0 140px; min-width: 120px; }
+}
+
+/* New badge-style skills layout (matching provided design) */
+.about-pane .skills-header {
+    text-align: center;
+    margin-bottom: 26px;
+}
+.about-pane .skills-header h2 {
+    font-size: 34px;
+    margin: 6px 0 8px;
+    letter-spacing: 0.5px;
+}
+.about-pane .skills-decor {
+    display:flex; /* center the decor under the header like the Skills header */
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    margin: 8px auto 12px auto;
+    width:520px;
+    max-width:80%;
+}
+.about-pane .skills-decor .decor-line {
+    height:4px;
+    width:520px;
+    background:linear-gradient(90deg,#fff 0%, rgba(255,255,255,0.15) 100%);
+    border-radius:4px;
+    position:relative;
+}
+.about-pane .skills-decor .decor-dot {
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,0.6);
+}
+.about-pane .skills-intro {
+    color:#e6e6e6;
+    margin: 10px auto 20px;
+    max-width:880px;
+    font-size:18px;
+}
+
+.about-pane .skills-columns {
+    display:flex;
+    gap:48px;
+    justify-content:center;
+    align-items:flex-start;
+    margin-bottom:26px; /* add gap so columns don't collide with following sections */
+    flex-wrap:wrap;
+}
+.about-pane .skills-column {
+    flex:1 1 420px;
+    max-width:520px;
+}
+.about-pane .skills-column h3 {
+    text-align:center;
+    color:#ffffff;
+    font-size:20px;
+    margin-bottom:0; /* keep heading and badges compact */
+}
+.about-pane .skill-badges {
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px; /* unified spacing for all badge groups */
+    justify-content:center;
+}
+.about-pane .skill-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 14px;
+    border-radius:8px;
+    color:white;
+    font-weight:700;
+    font-size:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
+    border:1px solid rgba(255,255,255,0.06);
+}
+
+.about-pane .skill-badge .skill-icon {
+    width:20px;
+    height:20px;
+    object-fit:contain;
+    display:inline-block;
+    margin-right:8px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+
+/* Icon-only skill badges: icon visible, label appears below on hover */
+.about-pane .skill-badges.icon-only { gap: 28px; }
+.about-pane .skill-icon-wrap {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:76px;
+    height:76px;
+    cursor:default;
+    position:relative;
+    margin-bottom:4px; /* reduce gap so label sits closer to the icon */
+}
+.about-pane .skill-icon-only {
+    width:44px;
+    height:44px;
+    object-fit:contain;
+    border-radius:10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.about-pane .skill-label {
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease;
+    color: #ffffff;
+    font-weight:700;
+    background: rgba(0,0,0,0.35);
+    padding: 3px 6px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 60; /* ensure label appears above nearby icons */
+    font-size: 70%;
+    line-height: 1; 
+}
+.about-pane .skill-icon-wrap:hover .skill-label,
+.about-pane .skill-icon-wrap:focus .skill-label {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width:720px) {
+    .about-pane .skill-icon-wrap { width:64px; height:64px; }
+    .about-pane .skill-icon-only { width:38px; height:38px; }
+    .about-pane .skill-label { bottom: -26px; font-size:13px }
+}
+
+/* Color variants */
+.skill-badge.b-blue{background:#2b89d9}
+.skill-badge.b-dark{background:#1f2937}
+.skill-badge.b-slate{background:#3b82c4}
+.skill-badge.b-yellow{background:#f6c84c;color:#111}
+.skill-badge.b-red{background:#ef5b5b}
+.skill-badge.b-orange{background:#f37b21}
+.skill-badge.b-cyan{background:#22c1c3}
+.skill-badge.b-purple{background:#7b61ff}
+.skill-badge.b-teal{background:#0ea5a4}
+.skill-badge.b-indigo{background:#4f46e5}
+.skill-badge.b-green{background:#10b981}
+.skill-badge.b-peach{background:#ffb070;color:#111}
+.skill-badge.b-pink{background:#ff7fb6}
+.skill-badge.b-red-dark{background:#e74c3c}
+.skill-badge.b-orange-dark{background:#d97706}
+.skill-badge.b-sky{background:#38bdf8;color:#04283a}
+.skill-badge.b-rose{background:#fb7185}
+.skill-badge.b-crimson{background:#ef4444}
+.skill-badge.b-dark-grey{background:#374151}
+.skill-badge.b-midnight{background:#0b1320}
+.skill-badge.b-teal-light{background:#5eead4;color:#04283a}
+.skill-badge.b-green-dark{background:#16a34a}
+.skill-badge.b-sea{background:#14b8a6}
+.skill-badge.b-emerald{background:#059669}
+.skill-badge.b-sky-dark{background:#0284c7}
+.skill-badge.b-purple-dark{background:#6d28d9}
+.skill-badge.b-navy{background:#12355b}
+
+.about-pane .skills-footer {
+    text-align:left;
+    margin-top:12px;
+    color:#e6e6e6;
+    font-size:18px;
+}
+
+@media (max-width: 880px) {
+    .about-pane .skills-columns { gap:18px; }
+    .about-pane .skills-decor .decor-line { width:140px; }
+    .about-pane .skills-header h2 { font-size:26px; }
+}
+
+/* Detailed resume-style skills list (left-aligned, easy to scan) */
+.about-pane .skills-detail-list {
+    max-width: 900px;
+    margin: 14px auto 28px;
+    padding-left: 22px;
+    color: #e6e6e6;
+    font-size: 16px;
+    line-height: 1.6;
+}
+.about-pane .skills-detail-list li {
+    margin-bottom: 10px;
+}
+.about-pane .skills-detail-list li strong {
+    display: inline-block;
+    min-width: 220px;
+    color: #ffffff;
+    font-weight: 700;
+}
+.about-pane .skills-detail-list li::marker {
+    color: #9ed0ff;
+}
+
+@media (max-width:720px) {
+    .about-pane .skills-detail-list { padding-left: 18px; font-size:15px; }
+    .about-pane .skills-detail-list li strong { min-width: 140px; display:block; margin-bottom:6px; }
+}
+
+/* Badge-driven categories (cloud, containers, IaC, monitoring, networking) */
+.about-pane .skills-categories {
+    max-width: 980px;
+    margin: 8px auto 26px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+.about-pane .skills-category {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    align-items: center; /* center headings, badges and descriptions */
+    text-align: center;
+}
+.about-pane .skills-category h4 {
+    color:#ffffff;
+    font-size:18px;
+    margin:0;
+    font-weight:800;
+    width:100%;
+}
+.about-pane .skills-category .category-desc {
+    color:#cfcfcf;
+    font-size:15px;
+    margin-top:2px;
+    width:100%;
+}
+.about-pane .skills-category .skill-badges {
+    display:flex;
+    gap:18px 20px;
+    flex-wrap:wrap;
+    margin-top:8px; /* provide breathing room between heading and badges */
+    justify-content: center;
+}
+
+@media (max-width:880px) {
+    .about-pane .skills-categories { gap:14px }
+    .about-pane .skills-category h4 { font-size:16px }
+}

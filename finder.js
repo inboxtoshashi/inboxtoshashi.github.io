@@ -66,45 +66,9 @@
                 sidebarItems.forEach(i => i.classList.remove('active'));
                 initial.classList.add('active');
             }
-            // Replace sidebar SVGs with PNG icons from `icons/` when available
-            (function replaceSidebarIcons() {
-                const map = {
-                    'airdrop': 'Airdrop.png',
-                    'desktop': 'desktop.png',
-                    'documents': 'documents.png',
-                    'downloads': 'downloads.png',
-                    'icloud': 'icloud.png',
-                    'iclouddrive': 'icloud.png'
-                    , 'applications': 'app-store.png'
-                };
-
-                sidebarItems.forEach(item => {
-                    const iconSpan = item.querySelector('.sidebar-icon');
-                    const svg = iconSpan ? iconSpan.querySelector('.sidebar-svg') : null;
-                    const label = (item.textContent || '').trim().split('\n')[0] || '';
-                    const key = label.toLowerCase().replace(/\s+/g, '');
-                    const file = map[key];
-                    if (file && iconSpan) {
-                        // keep a reference to the original svg for fallback
-                        const originalSvg = svg ? svg.cloneNode(true) : null;
-                        if (svg) svg.remove();
-                        const img = document.createElement('img');
-                        img.src = `icons/${file}`;
-                        img.alt = label;
-                        img.style.width = '18px';
-                        img.style.height = '18px';
-                        img.style.objectFit = 'contain';
-                        img.onerror = () => {
-                            // restore original svg if PNG not found
-                            if (originalSvg) {
-                                iconSpan.appendChild(originalSvg);
-                            }
-                            img.remove();
-                        };
-                        iconSpan.appendChild(img);
-                    }
-                });
-            })();
+                // Visitor widget is intentionally not injected into Finder UI.
+                // The widget will be initialized only when the Spy app is opened.
+            // No need to replace SVGs with PNGs; HTML now uses PNGs directly
             // Make sidebar sections collapsible (attach handlers to titles)
             (function initializeSidebarCollapsibleInFinder(){
                 const sections = win.querySelectorAll('.sidebar-section');
@@ -213,7 +177,8 @@
                 const apps = [
                     { src: 'doc-app/docker.png', name: 'Docker' },
                     { src: 'doc-app/calender.png', name: 'Calendar', app: 'calendar' },
-                    { src: 'doc-app/safari.png', name: 'Safari', app: 'safari', href: 'https://www.apple.com/safari' }
+                    { src: 'doc-app/safari.png', name: 'Safari', app: 'safari', href: 'https://www.apple.com/safari' },
+                    { src: 'icons/spy.png', name: 'Spy', app: 'spy' }
                 ];
 
                 // Applications are icon-only; no details panel
@@ -232,6 +197,11 @@
                     // Click behavior: open app if configured, otherwise open external link
                     tile.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        // Open Spy as a separate window (same behavior as Dock)
+                        if (a.app === 'spy' && typeof window.openApp === 'function') {
+                            window.openApp('spy');
+                            return;
+                        }
                         if (a.app && typeof window.openApp === 'function') {
                             window.openApp(a.app);
                         } else if (a.href) {
@@ -241,6 +211,54 @@
 
                     gridElement.appendChild(tile);
                 });
+
+                // Helper: show/hide an inline Spy panel above the grid
+                function ensureSpyPanel() {
+                    let panel = win.querySelector('.spy-inline-panel');
+                    if (panel) return panel;
+                    panel = document.createElement('div');
+                    panel.className = 'spy-inline-panel';
+                    panel.style.margin = '0 0 18px 0';
+                    panel.innerHTML = ` <div id="visitor-root-infinder"></div>`;
+                    const filesMain = win.querySelector('.files-main') || win;
+                    const filesGrid = filesMain.querySelector('#filesGrid') || filesMain.querySelector('.files-grid');
+                    if (filesGrid) filesMain.insertBefore(panel, filesGrid);
+                    else filesMain.insertBefore(panel, filesMain.firstChild);
+                    return panel;
+                }
+
+                function removeSpyPanel() {
+                    const existing = win.querySelector('.spy-inline-panel');
+                    if (existing) existing.remove();
+                }
+
+                function toggleSpyPanel() {
+                    const existing = win.querySelector('.spy-inline-panel');
+                    if (existing) { removeSpyPanel(); return; }
+
+                    // ensure CSS loaded
+                    if (!document.querySelector('link[href*="visitor-widget.css"]')) {
+                        const link = document.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = 'visitor-widget.css';
+                        document.head.appendChild(link);
+                    }
+
+                    const panel = ensureSpyPanel();
+
+                    // initialize widget into the infinder root (pass the element directly)
+                    const rootEl = panel.querySelector('#visitor-root-infinder');
+                    if (!window.VisitorWidget) {
+                        const s = document.createElement('script');
+                        s.src = 'visitorWidget.js';
+                        s.onload = function () {
+                            try { window.VisitorWidget.init(rootEl, { base: 10567 }); } catch (e) { console.error(e); }
+                        };
+                        document.body.appendChild(s);
+                    } else {
+                        try { window.VisitorWidget.init(rootEl, { base: 10567 }); } catch (e) { console.error(e); }
+                    }
+                }
 
                 // no details container for applications
             }
@@ -270,8 +288,10 @@
                     const thumbEl = tile.querySelector('.doc-thumb');
                     if (!thumbEl) return;
                     if (window.pdfjsLib && window.pdfjsLib.getDocument) {
+                        // Ensure workerSrc is set and disable worker fetch to avoid worker-side font requests
+                        try { if (pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; } catch (e) {}
                         const url = 'files/Shashi_Kant_Singh.pdf';
-                        const loadingTask = pdfjsLib.getDocument(url);
+                        const loadingTask = pdfjsLib.getDocument({ url: url, useWorkerFetch: false });
                         loadingTask.promise.then(pdf => {
                             return pdf.getPage(1).then(page => {
                                 const viewport = page.getViewport({ scale: 1 });
@@ -586,7 +606,14 @@
                 } else if (key === 'desktop') {
                     // Show the documents placed on the Desktop (reuse documents renderer)
                     renderDocuments();
-                } else if (key === 'downloads' || key === 'icloud' || key === 'shared' || key.startsWith('tag-') || key === 'recents' || key === 'cursor') {
+                } else if (key && key.startsWith('tag-')) {
+                    // For tags, clear the main area, keep left label, but hide the colored dot
+                    clearGrid();
+                    if (tagDot) tagDot.hidden = true;
+                    // Hide any tab/underline bar if present
+                    const tabBar = win.querySelector('.finder-tabs, .finder-tab-bar, .finder-tag-bar');
+                    if (tabBar) tabBar.style.display = 'none';
+                } else if (key === 'downloads' || key === 'icloud' || key === 'shared' || key === 'recents' || key === 'cursor') {
                     renderEmpty('Nothing here');
                 } else {
                     renderEmpty('Nothing here');

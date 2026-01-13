@@ -11,7 +11,8 @@ window.addEventListener('unhandledrejection', (ev) => {
 let windows = [];
 let zIndexCounter = 1000; // Start above dock (z-index: 900)
 let activeWindow = null;
-let forwardStack = [];
+// Track cascade placement index to avoid opening windows at random positions
+window.__openWindowCascadeIndex = window.__openWindowCascadeIndex || 0;
 
 // App Configurations
 const appConfigs = {
@@ -24,239 +25,349 @@ const appConfigs = {
     contact: { title: '✉️ Contact', width: 600, height: 650 },
     settings: { title: '⚙️ Settings', width: 700, height: 550 }
     ,calendar: { title: '📅 Calendar', width: 520, height: 420 }
+    ,spy: { title: '🕵️ Spy', width: 760, height: 460 }
 };
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-        // TEMP DEBUG: Log clicks on all menu icons
-        document.querySelectorAll('.menu-icon').forEach(icon => {
-            icon.addEventListener('click', (e) => {
-                console.log('[DEBUG] menu-icon clicked:', icon.className, e.target);
-            }, true);
-        });
+        // Add PDF desktop shortcut
+        const desktop = document.querySelector('.desktop');
+        if (desktop && !document.querySelector('.desktop-shortcut.pdf-resume')) {
+            const shortcut = document.createElement('div');
+            shortcut.className = 'desktop-shortcut pdf-resume';
+            shortcut.title = 'Resume (PDF)';
+            shortcut.style.cursor = 'pointer';
+            shortcut.innerHTML = `
+                <div class="desktop-shortcut-icon"><img src="icons/pdf.png" alt="PDF"/></div>
+                <div class="desktop-shortcut-label">Resume.pdf</div>
+            `;
+            shortcut.dataset.file = 'files/Shashi_Kant_Singh.pdf';
+            shortcut.addEventListener('dblclick', (e) => { e.stopImmediatePropagation(); openDesktopPdf(shortcut.dataset.file); });
+            shortcut.addEventListener('click', (e) => { e.stopImmediatePropagation(); openDesktopPdf(shortcut.dataset.file); });
+            desktop.appendChild(shortcut);
+            try { positionDesktopShortcuts(); } catch (e) {}
+        }
+
+        // Helper to open PDF in Preview app (robust: wait for window element)
+        function openDesktopPdf(filePath) {
+            openApp('preview');
+            // wait for the preview window element to exist, then initialize
+            const start = Date.now();
+            const timeout = 2000; // ms
+            (function waitForPreview() {
+                const winEntry = (window.windows || windows || []).find(w => w.appName === 'preview');
+                const previewEl = winEntry ? winEntry.element : document.querySelector('.window[data-app="preview"]');
+                if (previewEl && typeof initializePreview === 'function') {
+                    try { initializePreview(previewEl, filePath); } catch (e) { console.error('initializePreview failed', e); }
+                    return;
+                }
+                if (Date.now() - start < timeout) {
+                    setTimeout(waitForPreview, 80);
+                } else {
+                    console.warn('Preview element not found to load', filePath);
+                }
+            })();
+        }
+    // menu-icon click logging removed to reduce noisy debug output
     initializeDock();
     updateDateTime();
     setInterval(updateDateTime, 1000);
     initializeWiFiDropdown();
-    initializeControlCenter();
-    initializeSidebarCollapsible();
-    initializeCollapsibleSearch();
-    
-    // Initialize wallpaper system - wait a bit for wallpapers.js to fully load
-    setTimeout(() => {
-        if (window.wallpaperSystem) {
-            window.wallpaperSystem.initialize();
-            console.log('Wallpaper system initialized');
-        } else {
-            console.error('Wallpaper system not found');
-        }
-    }, 100);
+    // Restore desktop context menu (right-click) handler
+    function createDesktopContextMenu() {
+        let menu = document.querySelector('.desktop-context-menu');
+        if (menu) return menu;
+        menu = document.createElement('div');
+        menu.className = 'desktop-context-menu';
+        menu.style.display = 'none';
+        menu.innerHTML = `
+            <div class="ctx-item" data-action="new-folder">New Folder</div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item" data-action="get-info">Get Info</div>
+        `;
+        document.body.appendChild(menu);
 
-    // Add a desktop shortcut for the PDF in `files/` (top-right)
-    try {
-        const desktop = document.querySelector('.desktop');
-        if (desktop) {
-            const shortcut = document.createElement('div');
-            shortcut.className = 'desktop-shortcut';
-            shortcut.innerHTML = `
-                <div class="desktop-shortcut-icon">
-                    <img src="icons/pdf.png" alt="PDF" />
-                </div>
-                <div class="desktop-shortcut-label">Shashi_Kant_Singh.pdf</div>
-            `;
-            function openDesktopPdf(filePath) {
-                filePath = filePath || 'files/Shashi_Kant_Singh.pdf';
-                if (typeof openApp !== 'function') { console.warn('openApp not available'); return; }
-                openApp('preview');
+        menu.addEventListener('click', (ev) => {
+            const action = ev.target.closest('.ctx-item')?.dataset?.action;
+            if (!action) return;
+            ev.stopPropagation();
+            hideDesktopContextMenu();
+            if (action === 'new-folder') {
+                // create a placeholder folder shortcut using an existing icon
+                const folder = document.createElement('div');
+                folder.className = 'desktop-shortcut';
+                const iconHtml = `<div class="desktop-shortcut-icon"><img src="icons/desktop.png" alt="Folder"/></div>`;
+                const label = document.createElement('div');
+                label.className = 'desktop-shortcut-label';
+                label.contentEditable = 'true';
+                label.spellcheck = false;
+                label.textContent = 'New Folder';
+                folder.innerHTML = iconHtml;
+                folder.appendChild(label);
+                // append then position so measurements work
+                const desktopEl = document.querySelector('.desktop');
+                desktopEl?.appendChild(folder);
+                // ensure correct stacking/position immediately after adding
+                requestAnimationFrame(() => {
+                    try { positionDesktopShortcuts(); } catch (e) {}
+                });
+                // focus and select the label so user can rename immediately
                 setTimeout(() => {
-                    try {
-                        // looking for preview window
-                        const winEntry = (window.windows || windows || []).find(w => w.appName === 'preview');
-                        let previewEl = winEntry ? winEntry.element : null;
-                        if (!previewEl) previewEl = document.querySelector('.window[data-app="preview"]');
-                        if (previewEl && typeof initializePreview === 'function') {
-                            initializePreview(previewEl, filePath);
-                        } else {
-                            console.warn('Preview element not found to load', filePath);
-                        }
-                    } catch (err) {
-                        console.error('Failed to open preview from desktop shortcut', err);
-                    }
-                }, 400);
-            }
+                    label.focus();
+                    // select all text
+                    const range = document.createRange();
+                    range.selectNodeContents(label);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }, 60);
 
-            // attach data-file attribute so delegated handler can open appropriate file
-            shortcut.dataset.file = 'files/Shashi_Kant_Singh.pdf';
+                function commitLabel() {
+                    // sanitize and ensure non-empty
+                    const name = (label.textContent || '').trim() || 'New Folder';
+                    label.textContent = name;
+                    label.contentEditable = 'false';
+                    positionDesktopShortcuts();
+                }
 
-            shortcut.addEventListener('dblclick', (e) => { e.stopImmediatePropagation(); openDesktopPdf(shortcut.dataset.file); });
-            // Also support single-click to open (users expect single-click on this demo)
-            shortcut.addEventListener('click', (e) => { e.stopImmediatePropagation(); openDesktopPdf(shortcut.dataset.file); });
-
-            // Delegated handler: ensure clicks still work if shortcuts are re-rendered or lose handlers
-            document.addEventListener('click', (e) => {
-                const el = e.target.closest && e.target.closest('.desktop-shortcut');
-                if (!el) return;
-                // if the click was on an interactive element inside a window, ignore
-                e.stopImmediatePropagation();
-                const path = el.dataset.file;
-                if (path) openDesktopPdf(path);
-            });
-
-            // Capture-phase click handler: detect clicks by coordinates so desktop icons
-            // can be activated even if a window overlays them. This runs before target handlers.
-            document.addEventListener('click', (e) => {
-                try {
-                    const cx = e.clientX, cy = e.clientY;
-                    const shortcuts = document.querySelectorAll('.desktop-shortcut');
-                    for (const s of shortcuts) {
-                        const r = s.getBoundingClientRect();
-                        if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
-                            const path = s.dataset.file;
-                            if (path) {
-                                e.preventDefault();
-                                e.stopImmediatePropagation();
-                                openDesktopPdf(path);
-                                return;
-                            }
-                        }
-                    }
-                } catch (err) {}
-            }, true);
-            desktop.appendChild(shortcut);
-            // Ensure it's positioned correctly below the menu bar
-            try { positionDesktopShortcuts(); } catch (e) {}
-            // Create desktop context menu element (lazy)
-            function createDesktopContextMenu() {
-                let menu = document.querySelector('.desktop-context-menu');
-                if (menu) return menu;
-                menu = document.createElement('div');
-                menu.className = 'desktop-context-menu';
-                menu.style.display = 'none';
-                menu.innerHTML = `
-                    <div class="ctx-item" data-action="new-folder">New Folder</div>
-                    <div class="ctx-sep"></div>
-                    <div class="ctx-item" data-action="get-info">Get Info</div>
-                `;
-                document.body.appendChild(menu);
-
-                menu.addEventListener('click', (ev) => {
-                    const action = ev.target.closest('.ctx-item')?.dataset?.action;
-                    if (!action) return;
-                    ev.stopPropagation();
-                    hideDesktopContextMenu();
-                    if (action === 'new-folder') {
-                        // create a placeholder folder shortcut using an existing icon
-                        const folder = document.createElement('div');
-                        folder.className = 'desktop-shortcut';
-                        const iconHtml = `<div class="desktop-shortcut-icon"><img src="icons/desktop.png" alt="Folder"/></div>`;
-                        const label = document.createElement('div');
-                        label.className = 'desktop-shortcut-label';
-                        label.contentEditable = 'true';
-                        label.spellcheck = false;
+                label.addEventListener('blur', () => commitLabel());
+                label.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter') {
+                        ev.preventDefault();
+                        label.blur();
+                    } else if (ev.key === 'Escape') {
+                        ev.preventDefault();
+                        // revert name
                         label.textContent = 'New Folder';
-                        folder.innerHTML = iconHtml;
-                        folder.appendChild(label);
-                        // append then position so measurements work
-                        const desktopEl = document.querySelector('.desktop');
-                        desktopEl?.appendChild(folder);
-                        // ensure correct stacking/position immediately after adding
-                        requestAnimationFrame(() => {
-                            try { positionDesktopShortcuts(); } catch (e) {}
-                        });
-                        // focus and select the label so user can rename immediately
-                        setTimeout(() => {
-                            label.focus();
-                            // select all text
-                            const range = document.createRange();
-                            range.selectNodeContents(label);
-                            const sel = window.getSelection();
-                            sel.removeAllRanges();
-                            sel.addRange(range);
-                        }, 60);
-
-                        function commitLabel() {
-                            // sanitize and ensure non-empty
-                            const name = (label.textContent || '').trim() || 'New Folder';
-                            label.textContent = name;
-                            label.contentEditable = 'false';
-                            positionDesktopShortcuts();
-                        }
-
-                        label.addEventListener('blur', () => commitLabel());
-                        label.addEventListener('keydown', (ev) => {
-                            if (ev.key === 'Enter') {
-                                ev.preventDefault();
-                                label.blur();
-                            } else if (ev.key === 'Escape') {
-                                ev.preventDefault();
-                                // revert name
-                                label.textContent = 'New Folder';
-                                label.blur();
-                            }
-                        });
-
-                    } else if (action === 'get-info') {
-                        // Open About window and show social links + mailto
-                        openApp('about');
-                        setTimeout(() => {
-                            const winEntry = (window.windows || windows || []).find(w => w.appName === 'about');
-                            let aboutEl = winEntry ? winEntry.element : document.querySelector('.window[data-app="about"]');
-                            if (!aboutEl) return;
-                            const wrapper = aboutEl.querySelector('.window-content-wrapper');
-                            if (!wrapper) return;
-                            // Prefer to append links into the existing about content to preserve styles
-                            const aboutContent = wrapper.querySelector('.about-content') || wrapper;
-                            // Removed appended "Connect with me" links per user request
-                            // previously we appended a resume summary here; removed per user request
-                        }, 300);
+                        label.blur();
                     }
                 });
 
-                return menu;
+            } else if (action === 'get-info') {
+                // Open About window and show social links + mailto
+                openApp('about');
+                setTimeout(() => {
+                    const winEntry = (window.windows || windows || []).find(w => w.appName === 'about');
+                    let aboutEl = winEntry ? winEntry.element : document.querySelector('.window[data-app="about"]');
+                    if (!aboutEl) return;
+                    const wrapper = aboutEl.querySelector('.window-content-wrapper');
+                    if (!wrapper) return;
+                    // Prefer to append links into the existing about content to preserve styles
+                    const aboutContent = wrapper.querySelector('.about-content') || wrapper;
+                    // Removed appended "Connect with me" links per user request
+                    // previously we appended a resume summary here; removed per user request
+                }, 300);
             }
+        });
 
-            function hideDesktopContextMenu() {
-                const menu = document.querySelector('.desktop-context-menu');
-                if (menu) menu.style.display = 'none';
-            }
-
-            // Global contextmenu handler to intercept right-clicks on the desktop
-            document.addEventListener('contextmenu', (e) => {
-                try {
-                    const desktopEl = document.querySelector('.desktop');
-                    if (!desktopEl) return;
-                    // Only intercept if the right-click occurred on the desktop itself
-                    if (e.target && e.target.closest && e.target.closest('.desktop') && !e.target.closest('.window')) {
-                        e.preventDefault();
-                        const menu = createDesktopContextMenu();
-                        // position menu within viewport bounds
-                        const mw = menu.offsetWidth || 220;
-                        const mh = menu.offsetHeight || 180;
-                        const left = Math.min(e.clientX, window.innerWidth - mw - 8);
-                        const top = Math.min(e.clientY, window.innerHeight - mh - 8);
-                        menu.style.left = left + 'px';
-                        menu.style.top = top + 'px';
-                        menu.style.display = 'block';
-
-                        // hide on next click or escape
-                        const onDocClick = () => { hideDesktopContextMenu(); document.removeEventListener('click', onDocClick); };
-                        document.addEventListener('click', onDocClick);
-                        const onEsc = (ev) => { if (ev.key === 'Escape') { hideDesktopContextMenu(); document.removeEventListener('keydown', onEsc); } };
-                        document.addEventListener('keydown', onEsc);
-                    }
-                } catch (err) {
-                    // fail silently
-                }
-            });
-        }
-    } catch (e) {
-        console.error('Failed to create desktop shortcut', e);
+        return menu;
     }
+
+    function hideDesktopContextMenu() {
+        const menu = document.querySelector('.desktop-context-menu');
+        if (menu) menu.style.display = 'none';
+    }
+
+    // Global contextmenu handler to intercept right-clicks on the desktop
+    document.addEventListener('contextmenu', (e) => {
+        try {
+            const desktopEl = document.querySelector('.desktop');
+            if (!desktopEl) return;
+            // Only intercept if the right-click occurred on the desktop itself
+            if (e.target && e.target.closest && e.target.closest('.desktop') && !e.target.closest('.window')) {
+                e.preventDefault();
+                const menu = createDesktopContextMenu();
+                // position menu within viewport bounds
+                const mw = menu.offsetWidth || 220;
+                const mh = menu.offsetHeight || 180;
+                const left = Math.min(e.clientX, window.innerWidth - mw - 8);
+                const top = Math.min(e.clientY, window.innerHeight - mh - 8);
+                menu.style.left = left + 'px';
+                menu.style.top = top + 'px';
+                menu.style.display = 'block';
+
+                // hide on next click or escape
+                const onDocClick = () => { hideDesktopContextMenu(); document.removeEventListener('click', onDocClick); };
+                document.addEventListener('click', onDocClick);
+                const onEsc = (ev) => { if (ev.key === 'Escape') { hideDesktopContextMenu(); document.removeEventListener('keydown', onEsc); } };
+                document.addEventListener('keydown', onEsc);
+            }
+        } catch (err) {
+            // fail silently
+        }
+    });
 });
+
+// Attempt to load the best-matching icon file for each `.skill-icon-only` image.
+// This makes icon selection robust to filename case/spacing differences (e.g. "Terraform" -> Terraform.png).
+function resolveSkillIcons() {
+    const extCandidates = ['.png', '.svg', '.webp', '.PNG'];
+    const alias = {
+        'git': ['github.png', 'git.png'],
+        'gitlab': ['gitlab.png'],
+        'github actions': ['github-action.png', 'github_actions.png'],
+        'bash': ['linux.png', 'bash.png'],
+        'yml': ['yml.png', 'yaml.png'],
+        'elk': ['Elastic Search.png', 'elastic-search.png', 'elk.png'],
+        'elastic search': ['Elastic Search.png', 'elastic-search.png'],
+        'kibana': ['Kibana.png', 'kibana.png'],
+        'logstash': ['Logstash.png', 'logstash.png'],
+        'terraform': ['Terraform.png', 'terraform.png'],
+        'ssl': ['ssl.png'],
+        'tls': ['tls.png']
+    };
+
+    function normalize(name) {
+        return (name || '').toString().trim();
+    }
+
+    const wraps = document.querySelectorAll('.skill-icon-wrap');
+    wraps.forEach(wrap => {
+        const name = normalize(wrap.dataset.name || wrap.textContent || '');
+        const img = wrap.querySelector('img.skill-icon-only');
+        if (!img) return;
+
+        // Build ordered candidate list
+        const candidates = [];
+        const lower = name.toLowerCase();
+
+        // explicit aliases first
+        if (alias[lower]) candidates.push(...alias[lower]);
+
+        // common variants derived from name
+        const variants = new Set([
+            name,
+            name.replace(/\s+/g, '-'),
+            name.replace(/\s+/g, '_'),
+            name.replace(/\s+/g, ''),
+            lower,
+            lower.replace(/\s+/g, '-'),
+            lower.replace(/\s+/g, '_'),
+            lower.replace(/\s+/g, '')
+        ]);
+
+        variants.forEach(v => {
+            if (!v) return;
+            // try with extension and plain
+            extCandidates.forEach(ext => candidates.push(v + ext));
+            candidates.push(v);
+        });
+
+        // ensure uniqueness
+        const ordered = Array.from(new Set(candidates));
+
+        // Try each candidate by attempting to load it; use first that succeeds
+        (function tryNext(i) {
+            if (i >= ordered.length) return; // no candidate found
+            const src = 'icons/' + ordered[i];
+            const tester = new Image();
+            tester.onload = function() {
+                // found working icon — update img src
+                img.src = src;
+                // update alt if missing
+                if (!img.alt || img.alt.toLowerCase() === 'image') img.alt = name;
+            };
+            tester.onerror = function() {
+                tryNext(i + 1);
+            };
+            // start loading
+            tester.src = src;
+        })(0);
+    });
+}
 
 // Reposition shortcuts on resize and when datetime updates
 window.addEventListener('resize', () => {
     try { positionDesktopShortcuts(); } catch (e) {}
+});
+
+// Mobile launcher: small floating buttons to open Preview/Files when dock is hidden
+document.addEventListener('DOMContentLoaded', () => {
+    function createMobileLauncher() {
+        try {
+            if (globalThis.innerWidth > 720) {
+                const existing = document.querySelector('.mobile-launcher');
+                if (existing) existing.remove();
+                return;
+            }
+            if (document.querySelector('.mobile-launcher')) return;
+            const launcher = document.createElement('div');
+            launcher.className = 'mobile-launcher';
+
+            const btnPreview = document.createElement('button');
+            btnPreview.className = 'mobile-launcher-btn';
+            btnPreview.title = 'Open Preview';
+            btnPreview.innerText = 'Preview';
+            btnPreview.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openApp('preview');
+                btnPreview.disabled = true;
+                btnPreview.classList.add('disabled');
+            });
+
+            const btnFiles = document.createElement('button');
+            btnFiles.className = 'mobile-launcher-btn';
+            btnFiles.title = 'Open Files';
+            btnFiles.innerText = 'Files';
+            btnFiles.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openApp('files');
+                btnFiles.disabled = true;
+                btnFiles.classList.add('disabled');
+            });
+            // Helper to re-enable launcher buttons when windows are closed
+            function updateLauncherButtons() {
+                const previewOpen = !!(window.windows || []).find(w => w.appName === 'preview');
+                const filesOpen = !!(window.windows || []).find(w => w.appName === 'files');
+                btnPreview.disabled = previewOpen;
+                btnFiles.disabled = filesOpen;
+                btnPreview.classList.toggle('disabled', previewOpen);
+                btnFiles.classList.toggle('disabled', filesOpen);
+            }
+            // Listen for window open/close events
+            window.addEventListener('appWindowChange', updateLauncherButtons);
+            // Initial state
+            setTimeout(updateLauncherButtons, 200);
+
+            launcher.appendChild(btnPreview);
+            launcher.appendChild(btnFiles);
+            // default CSS-aware bottom using safe-area; JS will fine-tune for visualViewport
+            launcher.style.bottom = 'calc(env(safe-area-inset-bottom, 0px) + 16px)';
+            document.body.appendChild(launcher);
+
+            // Adjust position for browsers (iOS Safari) where viewport chrome reduces visible height
+            function adjustLauncherPosition() {
+                try {
+                    const lv = window.visualViewport;
+                    let extra = 0;
+                    if (lv && typeof lv.height === 'number') {
+                        // space occupied by browser UI at bottom
+                        const bottomInset = Math.max(0, window.innerHeight - (lv.pageTop + lv.height));
+                        extra = Math.round(bottomInset);
+                    }
+                    const base = 16; // base distance from bottom
+                    launcher.style.bottom = (base + extra) + 'px';
+                } catch (err) {
+                    // fallback to CSS safe-area
+                    launcher.style.bottom = 'calc(env(safe-area-inset-bottom, 0px) + 16px)';
+                }
+            }
+
+            // run once now and wire up resize/orientation changes
+            adjustLauncherPosition();
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', adjustLauncherPosition);
+                window.visualViewport.addEventListener('scroll', adjustLauncherPosition);
+            }
+            window.addEventListener('orientationchange', adjustLauncherPosition);
+            window.addEventListener('resize', adjustLauncherPosition);
+        } catch (err) {
+            console.error('createMobileLauncher failed', err);
+        }
+    }
+
+    createMobileLauncher();
+    window.addEventListener('resize', () => createMobileLauncher());
 });
 
 // Update Date Time
@@ -279,20 +390,35 @@ function updateDateTime() {
 // Position desktop shortcuts under the menu bar to avoid overlap.
 function positionDesktopShortcuts() {
     try {
+        // Do not reposition while the UI is locked — menu bar may be hidden
+        if (document.body.classList && document.body.classList.contains('locked')) return;
+
         const menuBar = document.querySelector('.menu-bar');
         const shortcuts = document.querySelectorAll('.desktop-shortcut');
         if (!menuBar || !shortcuts) return;
         const rect = menuBar.getBoundingClientRect();
         const baseTop = Math.ceil(rect.bottom + 12); // 12px gap
         const gap = 12;
-        // Stack shortcuts vertically from top-right downward
+        const baseRight = 18;
+        const desktopHeight = window.innerHeight;
+        // Estimate shortcut height (use first shortcut or fallback)
+        let shortcutHeight = 96;
+        if (shortcuts.length > 0) {
+            shortcutHeight = Math.ceil(shortcuts[0].getBoundingClientRect().height) || shortcuts[0].offsetHeight || 96;
+        }
+        // Calculate max shortcuts per column
+        const availableHeight = desktopHeight - baseTop - 24; // 24px bottom margin
+        const maxPerCol = Math.max(1, Math.floor(availableHeight / (shortcutHeight + gap)));
+
+        // Position shortcuts in columns, top to bottom, then next column
         const list = Array.from(shortcuts);
         list.forEach((s, idx) => {
-            // ensure right alignment
-            s.style.right = '18px';
-            // measure element height (includes label)
-            const h = Math.ceil(s.getBoundingClientRect().height) || s.offsetHeight || 96;
-            s.style.top = (baseTop + idx * (h + gap)) + 'px';
+            const col = Math.floor(idx / maxPerCol);
+            const row = idx % maxPerCol;
+            s.style.position = 'absolute';
+            s.style.top = (baseTop + row * (shortcutHeight + gap)) + 'px';
+            s.style.right = (baseRight + col * (shortcutHeight + 32)) + 'px'; // 32px gap between columns
+            s.style.left = '';
             const hasWindows = Array.isArray(window.windows) ? window.windows.length > 0 : (typeof windows !== 'undefined' ? windows.length > 0 : false);
             s.style.zIndex = hasWindows ? '50' : '150';
         });
@@ -316,6 +442,134 @@ function initializeSidebarCollapsible() {
         });
     });
 }
+
+// Lock screen: show/hide overlay and update clock
+document.addEventListener('DOMContentLoaded', () => {
+    const lockBtn = document.getElementById('lockScreenBtn');
+    const lockOverlay = document.getElementById('lockScreen');
+    // Shared fallbacks so show/hide can't race and re-add `locked` unexpectedly
+    let lockShowFallback = null;
+    let lockHideFallback = null;
+
+    function updateLockTime() {
+        if (!lockOverlay) return;
+        const now = new Date();
+        const timeEl = lockOverlay.querySelector('.lock-time');
+        const dateEl = lockOverlay.querySelector('.lock-date');
+        if (timeEl) {
+            // Show hour:minute without AM/PM (strip day period) to match lock-screen style
+            let t = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            t = t.replace(/\s?(AM|PM)$/i, '');
+            timeEl.textContent = t;
+        }
+        if (dateEl) {
+            // Use en-GB ordering to show: 'Sunday, 11 January'
+            dateEl.textContent = now.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+        }
+    }
+
+    function showLockScreen() {
+        if (!lockOverlay) return;
+        // lock show requested
+        // Clear any transient unlocking state, then set aria and add show class to trigger CSS transition
+        document.body.classList.remove('unlocking');
+        // reduce heavy effects while animating to improve performance
+        document.body.classList.add('reduce-effects');
+        // immediately fade UI chrome so it doesn't flash during the overlay fade
+            document.body.classList.add('locking');
+            // allow UI chrome to be displayed (remove `locked`) immediately so elements can repaint
+            document.body.classList.remove('locked');
+        lockOverlay.setAttribute('aria-hidden', 'false');
+        lockOverlay.classList.add('show');
+        // Wait for the opacity transition to complete before applying `locked`
+        // so the UI hidden-by-locked doesn't jump in mid-fade.
+        // clear any pending hide fallback (we're showing)
+        if (lockHideFallback) { clearTimeout(lockHideFallback); lockHideFallback = null; }
+        let showFallback = null;
+        const onTransitionEnd = (ev) => {
+            if (ev.target !== lockOverlay || ev.propertyName !== 'opacity') return;
+            lockOverlay.removeEventListener('transitionend', onTransitionEnd);
+            if (showFallback) { clearTimeout(showFallback); showFallback = null; }
+            document.body.classList.add('locked');
+            // remove the temporary locking fade (locked will actually hide the UI)
+            document.body.classList.remove('locking');
+            try { lockOverlay.querySelector('.lock-center')?.focus(); } catch (e) {}
+        };
+        lockOverlay.addEventListener('transitionend', onTransitionEnd);
+        // Fallback: ensure `locked` is applied even if transitionend doesn't fire
+        lockShowFallback = setTimeout(() => {
+            lockOverlay.removeEventListener('transitionend', onTransitionEnd);
+            document.body.classList.add('locked');
+            document.body.classList.remove('locking');
+            try { lockOverlay.querySelector('.lock-center')?.focus(); } catch (e) {}
+            lockShowFallback = null;
+        }, 320);
+        updateLockTime();
+    }
+
+    function hideLockScreen() {
+        if (!lockOverlay) return;
+        // lock hide requested
+        // cancel any pending show fallback so it doesn't re-apply `locked`
+        if (lockShowFallback) { clearTimeout(lockShowFallback); lockShowFallback = null; }
+        // ensure UI chrome becomes displayable, switch to `unlocking` so it fades in
+        document.body.classList.remove('locked');
+        document.body.classList.remove('locking');
+        document.body.classList.add('unlocking');
+        // ensure the browser has the current layout state, then trigger fade-out
+        try { lockOverlay.getBoundingClientRect(); } catch (e) {}
+        requestAnimationFrame(() => {
+            lockOverlay.classList.remove('show');
+        });
+
+        // Use transitionend so we remove locked/reduce-effects right after fade finishes
+        let hideFallback = null;
+        const onEnd = (ev) => {
+            if (ev.target !== lockOverlay || ev.propertyName !== 'opacity') return;
+            lockOverlay.removeEventListener('transitionend', onEnd);
+            if (hideFallback) { clearTimeout(hideFallback); hideFallback = null; }
+            lockOverlay.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('locked');
+            document.body.classList.remove('reduce-effects');
+            // remove temporary locking/unlocking fade
+            document.body.classList.remove('locking');
+            document.body.classList.remove('unlocking');
+            try { positionDesktopShortcuts(); } catch (e) {}
+        };
+        lockOverlay.addEventListener('transitionend', onEnd);
+        // Fallback: ensure cleanup occurs if transitionend is missed — match CSS duration (220ms) + buffer
+        lockHideFallback = setTimeout(() => {
+            lockOverlay.removeEventListener('transitionend', onEnd);
+            lockOverlay.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('locked');
+            document.body.classList.remove('reduce-effects');
+            document.body.classList.remove('locking');
+            document.body.classList.remove('unlocking');
+            try { positionDesktopShortcuts(); } catch (e) {}
+            lockHideFallback = null;
+        }, 320);
+    }
+
+    // attach handlers
+    if (lockBtn) lockBtn.addEventListener('click', (e) => { e.stopPropagation(); showLockScreen(); });
+
+    // Clicking anywhere on the lock overlay or pressing Escape dismisses it
+    if (lockOverlay) {
+        lockOverlay.addEventListener('click', (e) => {
+            // unlock on any click within the overlay
+            hideLockScreen();
+        });
+        // ensure initial DOM state has overlay hidden
+        lockOverlay.classList.remove('visible');
+        lockOverlay.setAttribute('aria-hidden', 'true');
+    }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideLockScreen(); });
+
+    // keep clock updated while visible
+    setInterval(() => {
+        if (lockOverlay && lockOverlay.classList && lockOverlay.classList.contains('show')) updateLockTime();
+    }, 1000);
+});
 
 // Collapsible search: show lens icon and expand to input on click
 function initializeCollapsibleSearch() {
@@ -356,45 +610,46 @@ function initializeDock() {
             openApp(appName);
         });
 
-        // Show a small restore control when hovering a dock icon for a minimized window
-        app.addEventListener('mouseenter', (e) => {
-            const appName = app.dataset.app;
-            const existingWindow = windows.find(w => w.appName === appName);
-            if (!existingWindow || !existingWindow.element.classList.contains('minimized')) return;
-
-            // avoid duplicating the overlay
-            if (app.querySelector('.dock-restore')) return;
-
-            const overlay = document.createElement('div');
-            overlay.className = 'dock-restore';
-            overlay.innerHTML = `<button class="dock-restore-btn" aria-label="Restore ${appName}">Restore</button>`;
-            overlay.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                // restore the window
-                existingWindow.element.classList.remove('minimized');
-                focusWindow(existingWindow.element);
-                overlay.remove();
-            });
-
-            app.appendChild(overlay);
-        });
-
-        app.addEventListener('mouseleave', () => {
-            const ov = app.querySelector('.dock-restore');
-            if (ov) ov.remove();
-        });
+        // small restore overlay on dock hover removed (UI simplified)
     });
 }
 
 // Open Application
 function openApp(appName) {
+    // Prevent rapid repeated opens: track apps currently being opened
+    window.__openingApps = window.__openingApps || {};
+    if (window.__openingApps[appName]) {
+        // If a window already exists, focus it; otherwise ignore the extra open
+        const existingWindow = windows.find(w => w.appName === appName);
+        if (existingWindow) {
+            if (existingWindow.element.classList.contains('minimized')) existingWindow.element.classList.remove('minimized');
+            focusWindow(existingWindow.element);
+            window.dispatchEvent(new Event('appWindowChange'));
+        }
+        return;
+    }
+    window.__openingApps[appName] = true;
+
+    // On mobile: only one window visible at a time
+    if (globalThis.innerWidth <= 720) {
+        // Minimize all other windows
+        (window.windows || []).forEach(w => {
+            if (w.appName !== appName && w.element && !w.element.classList.contains('minimized')) {
+                w.element.classList.add('minimized');
+            }
+        });
+    }
+
     // Check if app is already open
     const existingWindow = windows.find(w => w.appName === appName);
     if (existingWindow) {
-        focusWindow(existingWindow.element);
+        // Always bring to top and un-minimize
         if (existingWindow.element.classList.contains('minimized')) {
             existingWindow.element.classList.remove('minimized');
         }
+        focusWindow(existingWindow.element);
+        // Fire event so launcher can update
+        window.dispatchEvent(new Event('appWindowChange'));
         return;
     }
 
@@ -403,6 +658,19 @@ function openApp(appName) {
 
     const windowElement = createWindow(appName, config);
     document.getElementById('windowsContainer').appendChild(windowElement);
+
+    // If opening Safari on small screens, pin it under the menu bar so it's always visible
+    try {
+        if (appName === 'safari' && globalThis.innerWidth <= 720) {
+            // Use CSS calc with safe-area so it respects notches and browser chrome
+            windowElement.style.left = '0px';
+            windowElement.style.top = 'calc(env(safe-area-inset-top, 0px) + 48px)';
+            windowElement.style.width = '100%';
+            windowElement.style.height = 'calc(100vh - (env(safe-area-inset-top, 0px) + 120px))';
+            windowElement.style.position = 'fixed';
+            windowElement.classList.add('pinned-mobile');
+        }
+    } catch (e) { console.error('Failed to pin safari window on mobile', e); }
 
     // Load content
     loadWindowContent(windowElement, appName);
@@ -413,10 +681,19 @@ function openApp(appName) {
         element: windowElement,
         isMaximized: false
     });
+    // clear the opening flag now that the window exists
+    try { delete window.__openingApps[appName]; } catch(e) {}
+    // Fire event so launcher can update
+    window.dispatchEvent(new Event('appWindowChange'));
 
     // Mark dock app as active
     const dockApp = document.querySelector(`.dock-app[data-app="${appName}"]`);
     if (dockApp) dockApp.classList.add('active');
+
+    // Listen for window close to re-enable launcher button
+    windowElement.addEventListener('remove', () => {
+        setTimeout(() => window.dispatchEvent(new Event('appWindowChange')), 100);
+    });
 
     // Focus the new window
     focusWindow(windowElement);
@@ -426,34 +703,51 @@ function openApp(appName) {
 
 // Create Window
 function createWindow(appName, config) {
-    const window = document.createElement('div');
-    window.className = 'window';
-    window.dataset.app = appName;
-    
-    // Random position near center
-    const maxX = (window.innerWidth - config.width) / 2;
-    const maxY = (window.innerHeight - config.height) / 2;
-    const randomX = Math.max(50, maxX + (Math.random() - 0.5) * 200);
-    const randomY = Math.max(50, maxY + (Math.random() - 0.5) * 200);
-    
-    window.style.width = config.width + 'px';
-    window.style.height = config.height + 'px';
-    window.style.left = randomX + 'px';
-    window.style.top = randomY + 'px';
-    window.style.zIndex = zIndexCounter++;
+    const winEl = document.createElement('div');
+    winEl.className = 'window';
+    winEl.dataset.app = appName;
+
+    // Determine centered + cascading placement to avoid random offscreen windows
+    const vw = Math.max(320, globalThis.innerWidth || 1024);
+    const vh = Math.max(240, globalThis.innerHeight || 768);
+    const w = Math.min(config.width, vw - 24);
+    const h = Math.min(config.height, vh - 120);
+    const centerX = Math.max(12, Math.floor((vw - w) / 2));
+    const centerY = Math.max(12, Math.floor((vh - h) / 2));
+    // Use existing windows count as cascade index so new windows offset predictably
+    const cascadeIndex = (windows && windows.length) ? windows.length : (window.__openWindowCascadeIndex || 0);
+    const cascadeOffset = Math.min(160, cascadeIndex * 28);
+    // clamp final position within viewport
+    const left = Math.max(12, Math.min(centerX + cascadeOffset, vw - w - 12));
+    const top = Math.max( (document.querySelector('.menu-bar')?.getBoundingClientRect().height || 34) + 8, Math.min(centerY + cascadeOffset, vh - h - 48));
+
+    winEl.style.width = w + 'px';
+    winEl.style.height = h + 'px';
+    winEl.style.left = left + 'px';
+    winEl.style.top = top + 'px';
+    winEl.style.zIndex = zIndexCounter++;
     // allow keyboard focus for window-level keyboard handling
-    window.tabIndex = 0;
+    winEl.tabIndex = 0;
 
     // Title bar
     const titleBar = document.createElement('div');
     titleBar.className = 'window-titlebar';
+
+    // For Safari, show a small safari.png icon next to the title
+    let titleHtml = '';
+    if (appName === 'safari') {
+        titleHtml = `<div class="window-title"><img src="doc-app/safari.png" alt="Safari" class="window-app-icon"> Safari</div>`;
+    } else {
+        titleHtml = `<div class="window-title">${config.title}</div>`;
+    }
+
     titleBar.innerHTML = `
         <div class="window-controls">
             <div class="window-btn close"></div>
             <div class="window-btn minimize"></div>
             <div class="window-btn maximize"></div>
         </div>
-        <div class="window-title">${config.title}</div>
+        ${titleHtml}
         <div style="width: 52px;"></div>
     `;
 
@@ -461,13 +755,16 @@ function createWindow(appName, config) {
     const content = document.createElement('div');
     content.className = 'window-content-wrapper';
 
-    window.appendChild(titleBar);
-    window.appendChild(content);
+    winEl.appendChild(titleBar);
+    winEl.appendChild(content);
 
     // Add event listeners
-    addWindowEventListeners(window, titleBar);
+    addWindowEventListeners(winEl, titleBar);
 
-    return window;
+    // increment global cascade index for next window
+    try { window.__openWindowCascadeIndex = (window.__openWindowCascadeIndex || 0) + 1; } catch (e) {}
+
+    return winEl;
 }
 
 // Add Window Event Listeners
@@ -680,6 +977,14 @@ function focusWindow(window) {
 function closeWindow(window) {
     const appName = window.dataset.app;
     
+    // Destroy any widget instance attached to this window to stop timers
+    try {
+        if (window._visitorWidgetInstance && typeof window._visitorWidgetInstance.destroy === 'function') {
+            window._visitorWidgetInstance.destroy();
+            window._visitorWidgetInstance = null;
+        }
+    } catch (e) { console.error('Error destroying visitor widget on close', e); }
+
     // Remove from windows array
     windows = windows.filter(w => w.element !== window);
     
@@ -723,6 +1028,98 @@ function loadWindowContent(window, appName) {
         try { initializeAbout(window); } catch (e) {}
     } else if (appName === 'calendar') {
         initializeCalendar(window);
+    } else if (appName === 'spy') {
+        // Initialize Spy app: load visitor widget into this window's `#visitor-root`
+        try {
+            const headerLink = document.querySelector('link[href*="visitor-widget.css"]');
+            if (!headerLink) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                // Append cache-busting query so updated CSS loads immediately
+                link.href = 'visitor-widget.css?v=' + Date.now();
+                document.head.appendChild(link);
+            }
+
+            function initVisitorRoot() {
+                const root = window.querySelector('#visitor-root') || window.querySelector('.visitor-root');
+                if (!root) return;
+                // If an instance already exists on this window, destroy it first
+                try { if (window._visitorWidgetInstance && typeof window._visitorWidgetInstance.destroy === 'function') { window._visitorWidgetInstance.destroy(); window._visitorWidgetInstance = null; } } catch (e) { console.error('error destroying previous widget', e); }
+
+                    if (!globalThis.VisitorWidget) {
+                    const s = document.createElement('script');
+                    // Cache-bust the widget script so browser picks up latest changes
+                    s.src = 'visitorWidget.js?v=' + Date.now();
+                    s.onload = function () {
+                        try { window._visitorWidgetInstance = globalThis.VisitorWidget.init(root, { base: 10567 }); } catch (e) { console.error(e); }
+                        // after init, handle per-user increment via cache
+                        tryLocalIncrement(window._visitorWidgetInstance);
+                    };
+                    document.body.appendChild(s);
+                } else {
+                    try { window._visitorWidgetInstance = globalThis.VisitorWidget.init(root, { base: 10567 }); } catch (e) { console.error(e); }
+                    tryLocalIncrement(window._visitorWidgetInstance);
+                }
+
+                // Test increment removed — widget will show active session by default
+            }
+
+            // Wait a tick to ensure template content is attached
+            setTimeout(initVisitorRoot, 40);
+            
+                    function tryLocalIncrement(widgetInstance) {
+                        try {
+                            const key = 'visitor_counted_v1';
+                            // If already counted in this browser, do nothing
+                            if (localStorage.getItem(key)) return;
+                            // mark as counted in local cache
+                            localStorage.setItem(key, String(Date.now()));
+
+                            // Small helper: parse a simple browser + OS string from the UA
+                            function parseUserAgent() {
+                                const ua = navigator.userAgent || '';
+                                const platform = navigator.platform || '';
+                                let browser = 'Unknown';
+                                if (/OPR|Opera/.test(ua)) browser = 'Opera';
+                                else if (/Edg\b|Edge\b/.test(ua)) browser = 'Edge';
+                                else if (/Chrome\//.test(ua) && !/Chromium\//.test(ua)) browser = 'Chrome';
+                                else if (/CriOS\//.test(ua)) browser = 'Chrome (iOS)';
+                                else if (/Firefox\//.test(ua)) browser = 'Firefox';
+                                else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = 'Safari';
+
+                                let os = 'Unknown';
+                                if (/Win/.test(platform) || /Windows/.test(ua)) os = 'Windows';
+                                else if (/Mac/.test(platform) || /Macintosh/.test(ua)) os = 'macOS';
+                                else if (/Linux/.test(platform) || /X11/.test(ua)) os = 'Linux';
+                                else if (/Android/.test(ua)) os = 'Android';
+                                else if (/iPhone|iPad|iPod/.test(ua)) os = 'iOS';
+
+                                return { browser, os };
+                            }
+
+                            const client = parseUserAgent();
+
+                            // Prefer server increment endpoint if available
+                            // Attempt a POST to /api/visitors/increment; if it fails, fall back to local UI update
+                            fetch('/api/visitors/increment', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ amount: 1, client: client }) })
+                                .then(r => {
+                                    if (!r.ok) throw new Error('no increment endpoint');
+                                    // server will update total; widget will poll if configured, otherwise we can refresh
+                                    return r.json().catch(()=>null);
+                                })
+                                .catch(() => {
+                                    // fallback: increment local widget UI immediately
+                                    try {
+                                        if (widgetInstance && typeof widgetInstance.add === 'function') {
+                                            const when = new Date().toLocaleTimeString();
+                                            const entry = { icon: '👤', browser: client.browser, platform: client.os, when };
+                                            widgetInstance.add(1, entry);
+                                        }
+                                    } catch (e) { console.error('widget add fallback failed', e); }
+                                });
+                        } catch (e) { console.error('local increment failed', e); }
+                    }
+        } catch (e) { console.error('Failed to initialize Spy app widget', e); }
     }
 }
 
@@ -854,10 +1251,12 @@ function initializePreview(window, filePath) {
                     const filename = (filePath || defaultPath).split('/').pop() || 'document.pdf';
                     const fileObj = new File([blob], filename, { type: blob.type });
                     const blobUrl = URL.createObjectURL(fileObj);
+                    console.debug('initializePreview blobUrl', blobUrl);
                     iframe.src = blobUrl;
                 } catch (e) {
                     // fallback to blob URL if File constructor isn't supported
                     const blobUrl = URL.createObjectURL(blob);
+                    console.debug('initializePreview blobUrl (fallback)', blobUrl);
                     iframe.src = blobUrl;
                 }
             })
@@ -865,7 +1264,7 @@ function initializePreview(window, filePath) {
                 console.error('Failed to load PDF via fetch, falling back to direct src:', err);
                 iframe.src = filePath; // fallback
             });
-    }
+    // ...existing code...
 
     if (title) {
         title.textContent = filePath.split('/').pop();
@@ -879,9 +1278,10 @@ function initializePreview(window, filePath) {
             // show a nicer label
             pathLabel.textContent = name.replace(/_/g, ' ');
         }
-    } catch (e) {}
-
-    // Preview toolbar controls (zoom / fit)
+        } catch (err) {
+            console.error('createMobileLauncher failed', err);
+        }
+    }
     const zoomOutBtn = window.querySelector('#previewZoomOut');
     const zoomInBtn = window.querySelector('#previewZoomIn');
     const fitBtn = window.querySelector('#previewFit');
@@ -968,7 +1368,7 @@ I love building interactive web experiences and exploring new technologies.`;
         },
         projects: () => {
             return `My Projects:
-1. Portfolio Website - This interactive Ubuntu-themed site
+    1. Portfolio Website - This interactive macOS-themed site
 2. E-commerce Platform - Full-stack shopping application
 3. AI Chatbot - NLP-powered conversation bot
 4. Mobile Game - React Native game development`;
@@ -976,7 +1376,7 @@ I love building interactive web experiences and exploring new technologies.`;
         contact: () => {
             return `Contact Information:
 Email: your.email@example.com
-GitHub: github.com/yourusername
+GitHub: github.com/inboxtoshashi
 LinkedIn: linkedin.com/in/yourprofile
 Twitter: @yourhandle`;
         },
@@ -1000,7 +1400,7 @@ Music/      Videos/       Projects/     README.md`;
             if (args[0] === 'README.md') {
                 return `# Welcome to My Portfolio
 
-This is an interactive Ubuntu desktop portfolio.
+This is an interactive macOS desktop portfolio.
 Feel free to explore the applications and terminal!
 
 Created with ❤️ using HTML, CSS, and JavaScript.`;
@@ -1140,7 +1540,7 @@ function initializeSettings(window) {
             } else if (itemText.includes('About')) {
                 mainSection.innerHTML = `
                     <h2>About</h2>
-                    <p class="settings-description">Ubuntu Desktop Portfolio v1.0</p>
+                    <p class="settings-description">macOS Desktop Portfolio v1.0</p>
                     <div style="margin-top: 20px; line-height: 1.8; color: #d0d0d0;">
                         <p><strong>Version:</strong> 1.0.0</p>
                         <p><strong>Built with:</strong> HTML, CSS, JavaScript</p>
@@ -1167,7 +1567,7 @@ function initializeVSCode(window) {
 <span class="code-keyword">&lt;html</span> <span class="code-string">lang</span>=<span class="code-string">"en"</span><span class="code-keyword">&gt;</span>
 <span class="code-keyword">&lt;head&gt;</span>
     <span class="code-keyword">&lt;meta</span> <span class="code-string">charset</span>=<span class="code-string">"UTF-8"</span><span class="code-keyword">&gt;</span>
-    <span class="code-keyword">&lt;title&gt;</span>Ubuntu Desktop Portfolio<span class="code-keyword">&lt;/title&gt;</span>
+    <span class="code-keyword">&lt;title&gt;</span>macOS Desktop Portfolio<span class="code-keyword">&lt;/title&gt;</span>
 <span class="code-keyword">&lt;/head&gt;</span>
 <span class="code-keyword">&lt;body&gt;</span>
     <span class="code-comment">&lt;!-- Desktop Environment --&gt;</span>
@@ -1175,10 +1575,10 @@ function initializeVSCode(window) {
 <span class="code-keyword">&lt;/body&gt;</span>
 <span class="code-keyword">&lt;/html&gt;</span>`,
 
-        'styles.css': `<span class="code-comment">/* Ubuntu Desktop Portfolio Styles */</span>
+        'styles.css': `<span class="code-comment">/* macOS Desktop Portfolio Styles */</span>
 
 <span class="code-keyword">body</span> {
-    <span class="code-string">font-family</span>: <span class="code-string">'Ubuntu', sans-serif</span>;
+    <span class="code-string">font-family</span>: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     <span class="code-string">margin</span>: <span class="code-string">0</span>;
     <span class="code-string">padding</span>: <span class="code-string">0</span>;
     <span class="code-string">overflow</span>: <span class="code-string">hidden</span>;
@@ -1208,21 +1608,21 @@ function initializeVSCode(window) {
 <span class="code-comment">// Always learning, always building</span>
 console.<span class="code-function">log</span>(<span class="code-string">'Hello, World!'</span>);`,
 
-        'README.md': `<span class="code-comment"># Ubuntu Desktop Portfolio</span>
+        'README.md': `<span class="code-comment"># macOS Desktop Portfolio</span>
 
-An interactive portfolio website with Ubuntu desktop theme.
+    An interactive portfolio website with macOS desktop theme.
 
-<span class="code-keyword">## Features</span>
-- Multiple draggable windows
-- Working terminal with commands
-- Custom wallpaper support
-- Mac-style window controls
+    <span class="code-keyword">## Features</span>
+    - Multiple draggable windows
+    - Working terminal with commands
+    - Custom wallpaper support
+    - Mac-style window controls
 
-<span class="code-keyword">## Tech Stack</span>
-- HTML5, CSS3, JavaScript
-- No frameworks, pure vanilla JS
+    <span class="code-keyword">## Tech Stack</span>
+    - HTML5, CSS3, JavaScript
+    - No frameworks, pure vanilla JS
 
-<span class="code-string">Built with ❤️</span>`
+    <span class="code-string">Built with ❤️</span>`
     };
 
     const files = window.querySelectorAll('.vscode-file');
@@ -1318,7 +1718,7 @@ function initializeControlCenter() {
     if (volumeSlider) {
         volumeSlider.addEventListener('input', (e) => {
             const volume = e.target.value;
-            console.log(`Volume set to: ${volume}%`);
+            // visual-only volume control; logging removed
             // Note: Browser cannot control system volume for security reasons
             // This provides visual feedback only
         });

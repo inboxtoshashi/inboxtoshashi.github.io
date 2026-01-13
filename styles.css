@@ -1,3 +1,186 @@
+/* Universal mobile responsiveness for all UI elements */
+@media (max-width: 720px) {
+    html, body {
+        width: 100vw !important;
+        min-width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        font-size: 15px;
+    }
+    .desktop {
+        width: 100vw !important;
+        min-width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+        position: relative !important;
+        padding-bottom: 80px !important; /* for launcher */
+    }
+    .window {
+        width: 100vw !important;
+        min-width: 100vw !important;
+        max-width: 100vw !important;
+        left: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        top: 48px !important;
+        height: calc(100vh - 48px - 16px) !important;
+        min-height: 320px !important;
+        max-height: calc(100vh - 48px - 16px) !important;
+        box-shadow: none !important;
+        z-index: 100 !important;
+    }
+    .window-titlebar {
+        min-height: 44px !important;
+        font-size: 16px !important;
+        border-radius: 0 !important;
+    }
+    .window-content-wrapper, .window-content {
+        min-width: 0 !important;
+        min-height: 0 !important;
+        padding: 0 2vw !important;
+        font-size: 15px !important;
+        overflow-y: auto !important;
+        box-sizing: border-box !important;
+    }
+    .menu-bar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        min-width: 100vw !important;
+        max-width: 100vw !important;
+        z-index: 2000 !important;
+        font-size: 15px !important;
+        border-radius: 0 !important;
+    }
+    .desktop-shortcut {
+        top: unset !important;
+        bottom: 90px !important;
+        right: 12px !important;
+        width: 80px !important;
+        z-index: 120 !important;
+    }
+    .mobile-launcher {
+        position: fixed !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        z-index: 3000 !important;
+        display: flex !important;
+        justify-content: space-around !important;
+        background: rgba(30,30,30,0.92) !important;
+        padding: 10px 0 10px 0 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 -2px 16px rgba(0,0,0,0.18);
+    }
+    .mobile-launcher-btn {
+        flex: 1 1 0;
+        margin: 0 8px;
+        font-size: 18px !important;
+        padding: 12px 0 !important;
+        border-radius: 8px !important;
+    }
+    .safari-links {
+        flex-direction: row !important;
+        gap: 18px !important;
+        justify-content: center !important;
+        margin-bottom: 12px !important;
+    }
+    .safari-link-icon {
+        width: 38px !important;
+        height: 38px !important;
+    }
+    .lock-center, .lock-avatar, .lock-time {
+        font-size: 18px !important;
+        padding: 0 8px !important;
+    }
+    .lock-avatar {
+        width: 56px !important;
+        height: 56px !important;
+    }
+    .lock-time {
+        font-size: 32px !important;
+        margin-bottom: 8px !important;
+    }
+    .visitor-widget, .vw-root {
+        font-size: 15px !important;
+        padding: 8px 0 !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+    }
+    .wallpaper-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 0 2vw !important;
+    }
+    .wallpaper-item {
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        font-size: 14px !important;
+    }
+    .wallpaper-preview {
+        min-width: 0 !important;
+        min-height: 60px !important;
+        max-width: 100vw !important;
+        border-radius: 8px !important;
+    }
+    .contact-form input, .contact-form textarea {
+        font-size: 15px !important;
+        padding: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .contact-links, .social-links {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        justify-content: center !important;
+        font-size: 15px !important;
+    }
+    .window-controls, .window-btn {
+        min-width: 0 !important;
+        min-height: 0 !important;
+        width: 22px !important;
+        height: 22px !important;
+    }
+    .window-btn {
+        margin: 0 2px !important;
+    }
+    /* Hide non-essential desktop elements on mobile */
+    .desktop-context-menu, .airdrop-root, .airdrop-footer, .vscode-sidebar {
+        display: none !important;
+    }
+}
+/* Responsive video wallpaper: ensure it always covers and stays fixed on mobile */
+@media (max-width: 720px) {
+    #desktop-video-wallpaper {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        min-width: 100vw !important;
+        min-height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        object-fit: cover !important;
+        z-index: 0 !important;
+        pointer-events: none;
+    }
+    .desktop {
+        min-height: 100vh;
+        min-width: 100vw;
+        overflow: hidden;
+        position: relative;
+    }
+}
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -55,6 +238,7 @@
     padding: 20px 24px 12px;
     box-sizing: border-box;
     overflow: auto;
+    position: relative; /* combined common rules */
 }
 
 /* Reduce center fonts by ~30% and keep centered */
@@ -78,7 +262,7 @@
     transform: translateY(var(--airdrop-center-nudge)) !important;
 }
 
-/* Indent center texts 30% from the left and align text-left inside that inset */
+/* Indent center texts and keep centered */
 .airdrop-no-people,
 .airdrop-subtitle {
     display: block;
@@ -87,17 +271,6 @@
     text-align: center;
     word-break: normal;
 }
-.airdrop-no-people,
-.airdrop-subtitle {
-    display: block;
-    margin: 0 auto;
-    max-width: 90%;
-    text-align: center;
-    word-break: normal;
-}
-
-/* ensure the center block is horizontally centered in its container */
-.airdrop-center { align-items: center; justify-content: center; }
 .airdrop-footer {
     display: block;
     width: 100%;
@@ -132,7 +305,7 @@
 
 
 body {
-    font-family: 'Ubuntu', 'Segoe UI', Tahoma, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     overflow: hidden;
     height: 100vh;
     width: 100vw;
@@ -220,15 +393,42 @@ body {
     word-break: break-word;
 }
 
-/* About layout spacing: keep 20% gap between title and following content */
-.about-main h1 {
-    margin-bottom: 20%;
+/* About styles moved to about.css */
+
+/* Profile avatar and contact styles */
+.profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    background: radial-gradient(circle at 30% 30%, #7a6ef6 0%, #9a6ef6 70%);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+.profile-info .profile-title {
+    color: var(--muted,#bdbdbd);
+    margin-top: 6px;
 }
 
-/* About layout spacing: keep 20% gap between title and following content */
-.about-main .profile-section h1 {
-    margin-bottom: 20%;
+/* Add a little blank space after the main name heading */
+.profile-info h1 {
+    margin-bottom: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+.profile-contact {
+    margin-top: 8px;
+    color: var(--muted,#bdbdbd);
+}
+.contact-email {
+    display: block;
+}
+.contact-phone {
+    display: block;
+    margin-top: 6px;
 }
 
 /* macOS Menu Bar */
@@ -371,6 +571,189 @@ body {
     z-index: 100;
 }
 
+/* Lock-screen mode: hide UI chrome and show only the centered lock overlay */
+body.locked {
+    overflow: hidden;
+}
+body.locked .menu-bar,
+body.locked .dock,
+body.locked .desktop-shortcut,
+body.locked .windows-container,
+body.locked .desktop-context-menu,
+body.locked .wifi-dropdown,
+body.locked .control-center {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Quick UI chrome fade used while locking/unlocking to avoid instant jumps */
+body.locking .menu-bar,
+body.locking .dock,
+body.locking .desktop-shortcut,
+body.locking .windows-container,
+body.locking .desktop-context-menu,
+body.locking .wifi-dropdown,
+body.locking .control-center {
+    opacity: 0;
+    transition: opacity 120ms linear;
+    pointer-events: none;
+}
+body.locking .menu-bar { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+/* Unlocking: fade UI chrome back in while overlay fades out */
+body.unlocking .menu-bar,
+body.unlocking .dock,
+body.unlocking .desktop-shortcut,
+body.unlocking .windows-container,
+body.unlocking .desktop-context-menu,
+body.unlocking .wifi-dropdown,
+body.unlocking .control-center {
+    opacity: 1;
+    transition: opacity 220ms ease;
+    pointer-events: auto;
+}
+body.unlocking .menu-bar { -webkit-backdrop-filter: blur(30px) !important; backdrop-filter: blur(30px) !important; }
+
+/* Lock screen overlay — use opacity/visibility transitions */
+#lockScreen, .lock-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.35);
+    z-index: 99999;
+    /* start hidden, transition via opacity/visibility */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* only animate opacity for smooth, reliable fades */
+    transform: none;
+    transition: opacity 220ms ease;
+    will-change: opacity, transform; /* Added for performance */
+    backface-visibility: hidden; /* Added for performance */
+}
+/* visible state */
+#lockScreen.show, .lock-screen.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Make lock elements use GPU compositing to smooth animations */
+.lock-center, .lock-time, .lock-avatar {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: opacity, transform;
+}
+
+/* Slightly reduce heavy text-shadow for better performance during transitions */
+.lock-time { text-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+
+#lockScreen .lock-center {
+    outline: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    color: #ffffff;
+}
+
+#lockScreen .lock-top .lock-time {
+    font-size: 120px;
+    font-weight: 700;
+    line-height: 0.9;
+    text-shadow: 0 12px 40px rgba(0,0,0,0.65);
+}
+
+#lockScreen .lock-top .lock-date {
+    font-size: 18px;
+    opacity: 0.95;
+}
+
+#lockScreen .lock-bottom .lock-avatar img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+#lockScreen .lock-name {
+    margin-top: 8px;
+    font-weight: 700;
+}
+
+/* Lock screen overlay */
+.lock-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.12);
+    /* keep wallpaper visible with a gentle dim */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
+.lock-screen[aria-hidden="true"] { display: none; }
+.lock-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: #f6ecd9;
+    text-align: center;
+    padding: 48px 16px;
+    height: 100vh;
+    box-sizing: border-box;
+}
+.lock-top { margin-top: 16px; }
+.lock-bottom { margin-bottom: 72px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+.lock-date {
+    font-size: 18px;
+    color: rgba(246,236,217,0.9);
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+}
+.lock-time {
+    font-size: 140px;
+    font-weight: 800;
+    line-height: 0.85;
+    color: rgba(246,236,217,0.95);
+    text-shadow: 0 12px 40px rgba(0,0,0,0.55);
+}
+.lock-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #7ad67a 0%, #3bbf4a 60%);
+    display: flex;
+    
+    /* start hidden, will fade via opacity */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(1.02);
+    transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
+    justify-content: center;
+    font-size: 30px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    border: 3px solid rgba(255,255,255,0.08);
+}
+.lock-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
+.lock-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+}
+
+/* When a lock overlay is active, prevent body scrolling or interactions behind it */
+body.locked { overflow: hidden; }
+
+
 /* Window Styles */
 .window {
     position: absolute;
@@ -410,6 +793,15 @@ body {
     align-items: center;
     padding: 0 12px;
     cursor: move;
+
+.window-app-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    margin-right: 8px;
+    display: inline-block;
+    vertical-align: middle;
+}
     user-select: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
@@ -580,7 +972,7 @@ body {
     width: 6px;
     height: 6px;
     background: rgba(255, 255, 255, 0.8);
-
+}
 /* Small restore overlay shown when hovering a dock icon for a minimized window */
 .dock-restore {
     position: absolute;
@@ -604,10 +996,9 @@ body {
     border-radius: 6px;
     cursor: pointer;
 }
-.dock-restore-btn:hover { background: rgba(255,255,255,0.02); }
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-}
+
+/* dock restore styles removed */
+
 
 .app-icon {
     font-size: 38px;
@@ -1032,6 +1423,197 @@ body {
 
 .finder-view-btn:hover { background: rgba(255,255,255,0.02); color: #fff; }
 .finder-view-btn.active { background: rgba(255,255,255,0.04); color: #fff; }
+
+/* Mobile / small-screen adjustments to improve clarity and performance */
+@media (max-width: 900px) {
+    /* Reduce heavy visual effects that are expensive on mobile */
+    .menu-bar, .dock, .windows-container, .desktop, .finder-sidebar, .control-center, .wifi-dropdown {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Lock screen: much smaller time and lighter shadows for readability */
+    .lock-time { font-size: 48px !important; line-height: 1 !important; text-shadow: none !important; }
+    .lock-date { font-size: 14px !important; }
+    .lock-avatar { width: 48px !important; height: 48px !important; transform: none !important; opacity: 1 !important; visibility: visible !important; }
+    .lock-name { font-size: 13px !important; }
+    .lock-center { padding: 28px 12px !important; gap: 10px !important; }
+
+    /* Make windows fit the screen and avoid off-screen placement */
+    .window {
+        left: 6px !important;
+        top: 60px !important;
+        width: calc(100% - 12px) !important;
+        height: calc(100vh - 130px) !important;
+        border-radius: 8px !important;
+        transform: none !important;
+        margin: 0 !important;
+    }
+    .window.maximized { top: 48px !important; height: calc(100vh - 96px) !important; }
+
+    /* Dock: hide or simplify on very small screens to avoid covering content */
+    .dock { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+    .dock-app, .dock-trash { width: 44px !important; height: 44px !important; }
+
+    /* Reduce oversized UI elements that cause layout reflow */
+    .desktop-shortcut { display: none !important; visibility: hidden !important; }
+    .menu-bar { height: 44px !important; font-size: 13px !important; padding: 0 8px !important; }
+
+    /* Improve text rendering on small screens */
+    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* Disable heavy shadows on mobile to reduce paint cost */
+    .lock-time, .window, .dock, .desktop { box-shadow: none !important; }
+
+    /* Ensure body uses device-height properly (avoid 100vh issues caused by mobile browser chrome) */
+    html, body { height: auto !important; min-height: 100vh !important; }
+
+    /* Reduce background rendering cost */
+    .desktop { background-attachment: scroll !important; background-size: cover !important; }
+}
+
+/* Extra-small screens: aggressive simplification */
+@media (max-width: 420px) {
+    .lock-time { font-size: 40px !important; }
+    .lock-date { font-size: 13px !important; }
+    .menu-item { display: none !important; }
+    .apple-logo { display: inline-flex !important; }
+}
+
+/* Mobile / small screens: reduce fixed minimums, allow scrolling and make windows stack */
+@media (max-width: 720px) {
+    /* Allow page to scroll on small devices */
+    body { overflow: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Make windows full-width and remove large min-widths */
+    .window {
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    /* Ensure windows container doesn't overflow; stack windows vertically */
+    .windows-container {
+        position: relative !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        height: auto !important;
+        padding-bottom: 12px !important;
+        overflow: visible !important;
+    }
+
+    /* Reduce heavy lock-time and avatar sizes */
+    #lockScreen .lock-center { padding: 18px !important; }
+    #lockScreen .lock-top .lock-time { font-size: 48px !important; }
+    .lock-avatar img { width: 56px !important; height: 56px !important; }
+
+    /* Hide dock and desktop shortcuts to avoid horizontal space issues */
+    /* On mobile show a compact horizontal dock under the menu bar instead of the large bottom dock */
+    .desktop-shortcut { display: none !important; }
+    .dock {
+        display: flex !important;
+        position: fixed !important;
+        /* respect safe area (iOS) and sit below the menu-bar */
+        top: calc(env(safe-area-inset-top, 0px) + 48px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
+        height: 56px !important;
+        padding: 6px 8px !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        background: rgba(0,0,0,0.35) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        box-shadow: none !important;
+        z-index: 10002 !important; /* above menu-bar */
+    }
+    .dock-app, .dock-trash { width: 46px !important; height: 46px !important; border-radius: 10px !important; }
+    .dock-app .app-icon img { width: 36px !important; height: 36px !important; }
+
+    /* Make menu-bar sticky at top and compress its contents */
+    .menu-bar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 44px !important;
+        padding: 0 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        z-index: 9999 !important;
+    }
+
+    /* Ensure windows start below the menu bar + compact dock */
+    .windows-container { top: calc(env(safe-area-inset-top, 0px) + 48px) !important; padding-top: calc(48px + 72px) !important; }
+
+    /* Compress finder/search widths */
+    .finder-search input { width: 120px !important; }
+
+    /* Make preview iframe responsive within its container and visible on mobile */
+    .preview-area { width: 100% !important; }
+    .preview-iframe { width: 100% !important; height: 56vh !important; min-height: 360px !important; display: block !important; }
+
+    /* Reduce large text-shadows during transitions to avoid repaints */
+    .lock-time, .window { text-shadow: none !important; }
+}
+
+/* Safari simulated page link icons */
+.safari-page { padding: 18px; }
+.safari-links { display:flex; flex-direction:row; gap:18px; margin-top:14px; align-items:center; flex-wrap:wrap; }
+.safari-link { display:inline-flex; align-items:center; justify-content:center; width:auto; padding:6px; border-radius:8px; background: transparent; text-decoration: none; }
+.safari-link:hover { background: rgba(255,255,255,0.02); }
+.safari-link-icon { width: 48px; height: 48px; object-fit: contain; display:block; }
+
+
+/* Mobile launcher styling: appears on small screens to provide quick access when dock is hidden */
+@media (max-width: 720px) {
+    .mobile-launcher {
+        position: fixed;
+        right: 12px;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 10010 !important;
+        pointer-events: auto;
+    }
+    .mobile-launcher-btn {
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+        cursor: pointer;
+    }
+    .mobile-launcher-btn:active { transform: translateY(1px); }
+    /* Ensure windows content isn't obscured by bottom UI + launcher */
+    .windows-container { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px) !important; }
+}
+
+/* When the lock screen is active, temporarily reduce heavy visual effects to improve performance */
+body.reduce-effects .menu-bar,
+body.reduce-effects .dock,
+body.reduce-effects .windows-container,
+body.reduce-effects .desktop,
+body.reduce-effects .control-center,
+body.reduce-effects .wifi-dropdown,
+body.reduce-effects .finder-sidebar {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+}
 
 .finder-search input {
     height: 32px;
