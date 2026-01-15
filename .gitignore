@@ -1,4 +1,0 @@
-# Ignore Jenkins CLI jar, cookies, and crumb files
-jenkins-cli.jar
-cookies.txt
-crumb.json
