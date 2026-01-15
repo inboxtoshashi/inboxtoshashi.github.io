@@ -1,0 +1,14 @@
+/* macOS Menu Bar Icons */
+.icon-accessibility svg,
+.icon-battery svg,
+.icon-wifi svg,
+.icon-search svg,
+.icon-control svg {
+    width: 16px;
+    height: 16px;
+    fill: rgba(255, 255, 255, 0.85);
+}
+
+.menu-icon svg {
+    display: block;
+}
