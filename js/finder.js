@@ -175,10 +175,10 @@
             function renderApplications() {
                 clearGrid();
                 const apps = [
-                    { src: 'doc-app/docker.png', name: 'Docker' },
-                    { src: 'doc-app/calender.png', name: 'Calendar', app: 'calendar' },
-                    { src: 'doc-app/safari.png', name: 'Safari', app: 'safari', href: 'https://www.apple.com/safari' },
-                    { src: 'icons/spy.png', name: 'Spy', app: 'spy' }
+                    { src: 'images/doc-app/docker.png', name: 'Docker' },
+                    { src: 'images/doc-app/calender.png', name: 'Calendar', app: 'calendar' },
+                    { src: 'images/doc-app/safari.png', name: 'Safari', app: 'safari', href: 'https://www.apple.com/safari' },
+                    { src: 'images/icons/spy.png', name: 'Spy', app: 'spy' }
                 ];
 
                 // Applications are icon-only; no details panel
@@ -240,7 +240,7 @@
                     if (!document.querySelector('link[href*="visitor-widget.css"]')) {
                         const link = document.createElement('link');
                         link.rel = 'stylesheet';
-                        link.href = 'visitor-widget.css';
+                        link.href = 'css/visitor-widget.css';
                         document.head.appendChild(link);
                     }
 
@@ -250,7 +250,7 @@
                     const rootEl = panel.querySelector('#visitor-root-infinder');
                     if (!window.VisitorWidget) {
                         const s = document.createElement('script');
-                        s.src = 'visitorWidget.js';
+                        s.src = 'js/visitorWidget.js';
                         s.onload = function () {
                             try { window.VisitorWidget.init(rootEl, { base: 10567 }); } catch (e) { console.error(e); }
                         };
@@ -270,7 +270,7 @@
                 tile.className = 'doc-tile';
                 tile.innerHTML = `
                     <div class="doc-thumb" style="width:96px;height:96px;border-radius:6px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;">
-                        <img src="icons/pdf.png" alt="PDF" style="width:64px;height:64px;object-fit:contain;" />
+                        <img src="images/icons/pdf.png" alt="PDF" style="width:64px;height:64px;object-fit:contain;" />
                     </div>
                     <div class="doc-name">Shashi_Kant_Singh.pdf</div>
                 `;
@@ -327,7 +327,7 @@
                 const img = tile.querySelector('img');
                 if (img) {
                     img.addEventListener('error', () => {
-                        img.src = 'icons/pdf.png';
+                        img.src = 'images/icons/pdf.png';
                     });
                 }
 

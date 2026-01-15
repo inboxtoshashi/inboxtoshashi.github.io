@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shortcut.title = 'Resume (PDF)';
             shortcut.style.cursor = 'pointer';
             shortcut.innerHTML = `
-                <div class="desktop-shortcut-icon"><img src="icons/pdf.png" alt="PDF"/></div>
+                <div class="desktop-shortcut-icon"><img src="images/icons/pdf.png" alt="PDF"/></div>
                 <div class="desktop-shortcut-label">Resume.pdf</div>
             `;
             shortcut.dataset.file = 'files/Shashi_Kant_Singh.pdf';
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // create a placeholder folder shortcut using an existing icon
                 const folder = document.createElement('div');
                 folder.className = 'desktop-shortcut';
-                const iconHtml = `<div class="desktop-shortcut-icon"><img src="icons/desktop.png" alt="Folder"/></div>`;
+                const iconHtml = `<div class="desktop-shortcut-icon"><img src="images/icons/desktop.png" alt="Folder"/></div>`;
                 const label = document.createElement('div');
                 label.className = 'desktop-shortcut-label';
                 label.contentEditable = 'true';
@@ -259,7 +259,7 @@ function resolveSkillIcons() {
         // Try each candidate by attempting to load it; use first that succeeds
         (function tryNext(i) {
             if (i >= ordered.length) return; // no candidate found
-            const src = 'icons/' + ordered[i];
+            const src = 'images/icons/' + ordered[i];
             const tester = new Image();
             tester.onload = function() {
                 // found working icon — update img src
@@ -1036,7 +1036,7 @@ function loadWindowContent(window, appName) {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
                 // Append cache-busting query so updated CSS loads immediately
-                link.href = 'visitor-widget.css?v=' + Date.now();
+                link.href = 'css/visitor-widget.css?v=' + Date.now();
                 document.head.appendChild(link);
             }
 
@@ -1049,7 +1049,7 @@ function loadWindowContent(window, appName) {
                     if (!globalThis.VisitorWidget) {
                     const s = document.createElement('script');
                     // Cache-bust the widget script so browser picks up latest changes
-                    s.src = 'visitorWidget.js?v=' + Date.now();
+                    s.src = 'js/visitorWidget.js?v=' + Date.now();
                     s.onload = function () {
                         try { window._visitorWidgetInstance = globalThis.VisitorWidget.init(root, { base: 10567 }); } catch (e) { console.error(e); }
                         // after init, handle per-user increment via cache

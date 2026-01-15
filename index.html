@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>macOS Portfolio</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="about.css">
-    <link rel="stylesheet" href="finder.css">
-    <link rel="stylesheet" href="terminal.css">
-    <link rel="stylesheet" href="preview.css">
-    <link rel="stylesheet" href="calendar.css">
-    <link rel="stylesheet" href="icons.css">
-    <link rel="stylesheet" href="wifi-dropdown.css">
-    <link rel="stylesheet" href="control-center.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/about.css">
+    <link rel="stylesheet" href="css/finder.css">
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/preview.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/wifi-dropdown.css">
+    <link rel="stylesheet" href="css/control-center.css">
+    <link rel="stylesheet" href="css/apple-menu.css">
+    <link rel="stylesheet" href="css/visitor-widget.css">
     <!-- StackBlur.js for vibrancy (https://github.com/flozz/StackBlur) -->
     <script src="https://cdn.jsdelivr.net/npm/stackblur-canvas@2.6.0/dist/stackblur.min.js"></script>
 </head>
@@ -39,10 +41,10 @@
             </div>
             <div class="menu-bar-right">
                 <span class="menu-icon icon-battery">
-                    <img src="icons/battery.png" alt="Battery" style="width: 20px; height: 30px; display: block; object-fit: contain; margin-bottom: 0;" />
+                    <img src="images/icons/battery.png" alt="Battery" style="width: 20px; height: 30px; display: block; object-fit: contain; margin-bottom: 0;" />
                 </span>
                 <span class="menu-icon icon-wifi" id="wifiIcon">
-                    <img src="icons/wifi.png" alt="WiFi" style="width: 20px; height: 16px; display: block;" />
+                    <img src="images/icons/wifi.png" alt="WiFi" style="width: 20px; height: 16px; display: block;" />
                 </span>
                 
                 <!-- WiFi Dropdown -->
@@ -208,10 +210,10 @@
                     </svg>
                 </span>
                 <span class="menu-icon icon-control" id="controlCenterIcon">
-                    <img src="icons/switch.png" alt="Switch" style="width: 16px; height: 16px; display: block; border-radius: 4px; object-fit: contain;" />
+                    <img src="images/icons/switch.png" alt="Switch" style="width: 16px; height: 16px; display: block; border-radius: 4px; object-fit: contain;" />
                 </span>
                 <span class="menu-icon icon-siri">
-                    <img src="icons/siri-orb.png" alt="Siri" style="width: 20px; height: 20px; display: block; border-radius: 50%;" />
+                    <img src="images/icons/siri-orb.png" alt="Siri" style="width: 20px; height: 20px; display: block; border-radius: 50%;" />
                 </span>
                 <span class="menu-icon icon-lock" id="lockScreenBtn" title="Lock Screen" aria-label="Lock Screen">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px;fill:currentColor;">
@@ -233,23 +235,23 @@
         <!-- macOS Dock -->
         <div class="dock">
             <div class="dock-app" data-app="files" title="Finder">
-                <div class="app-icon"><img src="doc-app/finder.png" alt="Finder" style="width: 48px; height: 48px; object-fit: contain;" /></div>
+                <div class="app-icon"><img src="images/doc-app/finder.png" alt="Finder" style="width: 48px; height: 48px; object-fit: contain;" /></div>
             </div>
             <div class="dock-app" data-app="safari" title="Safari">
-                <div class="app-icon"><img src="doc-app/safari.png" alt="Safari" style="width: 48px; height: 48px; object-fit: contain;" /></div>
+                <div class="app-icon"><img src="images/doc-app/safari.png" alt="Safari" style="width: 48px; height: 48px; object-fit: contain;" /></div>
             </div>
             <div class="dock-app" data-app="terminal" title="Terminal">
-                <div class="app-icon"><img src="doc-app/terminal.png" alt="Terminal" style="width: 48px; height: 48px; object-fit: contain;" /></div>
+                <div class="app-icon"><img src="images/doc-app/terminal.png" alt="Terminal" style="width: 48px; height: 48px; object-fit: contain;" /></div>
             </div>
             <div class="dock-app" data-app="preview" title="Preview">
-                <div class="app-icon"><img src="doc-app/preview.png" alt="Preview" style="width: 48px; height: 48px; object-fit: contain;" /></div>
+                <div class="app-icon"><img src="images/doc-app/preview.png" alt="Preview" style="width: 48px; height: 48px; object-fit: contain;" /></div>
             </div>
             <div class="dock-app" data-app="spy" title="Spy">
-                <div class="app-icon"><img src="icons/spy.png" alt="Spy" style="width: 48px; height: 48px; object-fit: contain;" /></div>
+                <div class="app-icon"><img src="images/icons/spy.png" alt="Spy" style="width: 48px; height: 48px; object-fit: contain;" /></div>
             </div>
             <div class="dock-separator"></div>
             <div class="dock-trash" title="Trash">
-                <div class="app-icon"><img src="doc-app/bin.png" alt="Trash" style="width: 48px; height: 48px; object-fit: contain;" /></div>
+                <div class="app-icon"><img src="images/doc-app/bin.png" alt="Trash" style="width: 48px; height: 48px; object-fit: contain;" /></div>
             </div>
         </div>
     </div>
@@ -262,7 +264,7 @@
                     <div class="lock-time">1:21</div>
                 </div>
                 <div class="lock-bottom">
-                    <div class="lock-avatar"><img src="icons/lock-cloud.svg" alt="Lock avatar"/></div>
+                    <div class="lock-avatar"><img src="images/icons/lock-cloud.svg" alt="Lock avatar"/></div>
                     <div class="lock-name">Guest</div>
                 </div>
         </div>
@@ -394,31 +396,31 @@
                             <h3>Languages</h3>
                             <div class="skill-badges icon-only">
                                 <span class="skill-icon-wrap" data-name="Python">
-                                    <img class="skill-icon-only" src="icons/python.png" alt="Python">
+                                    <img class="skill-icon-only" src="images/icons/python.png" alt="Python">
                                     <span class="skill-label">Python</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Linux">
-                                    <img class="skill-icon-only" src="icons/linux.png" alt="Linux">
+                                    <img class="skill-icon-only" src="images/icons/linux.png" alt="Linux">
                                     <span class="skill-label">Linux</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="C++">
-                                    <img class="skill-icon-only" src="icons/cpp.png" alt="C++">
+                                    <img class="skill-icon-only" src="images/icons/cpp.png" alt="C++">
                                     <span class="skill-label">C++</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="HTML5">
-                                    <img class="skill-icon-only" src="icons/html5.png" alt="HTML5">
+                                    <img class="skill-icon-only" src="images/icons/html5.png" alt="HTML5">
                                     <span class="skill-label">HTML5</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="CSS">
-                                    <img class="skill-icon-only" src="icons/css.png" alt="CSS">
+                                    <img class="skill-icon-only" src="images/icons/css.png" alt="CSS">
                                     <span class="skill-label">CSS</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Terraform">
-                                    <img class="skill-icon-only" src="icons/terraform.png" alt="Terraform">
+                                    <img class="skill-icon-only" src="images/icons/Terraform.png" alt="Terraform">
                                     <span class="skill-label">Terraform</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="YML">
-                                    <img class="skill-icon-only" src="icons/yml.png" alt="YML">
+                                    <img class="skill-icon-only" src="images/icons/yml.png" alt="YML">
                                     <span class="skill-label">YML</span>
                                 </span>
                             </div>
@@ -428,19 +430,19 @@
                             <h3>CI/CD &amp; DevOps Tools</h3>
                             <div class="skill-badges icon-only">
                                 <span class="skill-icon-wrap" data-name="Jenkins">
-                                    <img class="skill-icon-only" src="icons/jenkins.png" alt="Jenkins">
+                                    <img class="skill-icon-only" src="images/icons/jenkins.png" alt="Jenkins">
                                     <span class="skill-label">Jenkins</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="GitHub Actions">
-                                    <img class="skill-icon-only" src="icons/github-action.png" alt="GitHub Actions">
+                                    <img class="skill-icon-only" src="images/icons/github-action.png" alt="GitHub Actions">
                                     <span class="skill-label">GitHub Actions</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Git">
-                                    <img class="skill-icon-only" src="icons/github.png" alt="Git">
+                                    <img class="skill-icon-only" src="images/icons/github.png" alt="Git">
                                     <span class="skill-label">Git</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="GitLab">
-                                    <img class="skill-icon-only" src="icons/gitlab.png" alt="GitLab">
+                                    <img class="skill-icon-only" src="images/icons/gitlab.png" alt="GitLab">
                                     <span class="skill-label">GitLab</span>
                                 </span>
                             </div>
@@ -452,31 +454,31 @@
                             <h4>Cloud Platforms</h4>
                             <div class="skill-badges icon-only">
                                 <span class="skill-icon-wrap" data-name="EC2">
-                                    <img class="skill-icon-only" src="icons/ec2.png" alt="EC2">
+                                    <img class="skill-icon-only" src="images/icons/ec2.png" alt="EC2">
                                     <span class="skill-label">EC2</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="S3">
-                                    <img class="skill-icon-only" src="icons/s3.png" alt="S3">
+                                    <img class="skill-icon-only" src="images/icons/s3.png" alt="S3">
                                     <span class="skill-label">S3</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="VPC">
-                                    <img class="skill-icon-only" src="icons/vpc.png" alt="VPC">
+                                    <img class="skill-icon-only" src="images/icons/vpc.png" alt="VPC">
                                     <span class="skill-label">VPC</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="CloudFront">
-                                    <img class="skill-icon-only" src="icons/cloudfront.png" alt="CloudFront">
+                                    <img class="skill-icon-only" src="images/icons/cloudfront.png" alt="CloudFront">
                                     <span class="skill-label">CloudFront</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Route 53">
-                                    <img class="skill-icon-only" src="icons/route53.png" alt="Route 53">
+                                    <img class="skill-icon-only" src="images/icons/route53.png" alt="Route 53">
                                     <span class="skill-label">Route 53</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="IAM">
-                                    <img class="skill-icon-only" src="icons/iam.png" alt="IAM">
+                                    <img class="skill-icon-only" src="images/icons/iam.png" alt="IAM">
                                     <span class="skill-label">IAM</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="EKS">
-                                    <img class="skill-icon-only" src="icons/eks.png" alt="EKS">
+                                    <img class="skill-icon-only" src="images/icons/eks.png" alt="EKS">
                                     <span class="skill-label">EKS</span>
                                 </span>
                             </div>
@@ -487,11 +489,11 @@
                             <h4>Containers &amp; Orchestration</h4>
                             <div class="skill-badges icon-only">
                                 <span class="skill-icon-wrap" data-name="Docker">
-                                    <img class="skill-icon-only" src="icons/docker.png" alt="Docker">
+                                    <img class="skill-icon-only" src="images/icons/docker.png" alt="Docker">
                                     <span class="skill-label">Docker</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Kubernetes">
-                                    <img class="skill-icon-only" src="icons/kubernetes.png" alt="Kubernetes">
+                                    <img class="skill-icon-only" src="images/icons/kubernetes.png" alt="Kubernetes">
                                     <span class="skill-label">Kubernetes</span>
                                 </span>
                             </div>
@@ -504,27 +506,27 @@
                             <h4>Monitoring &amp; Observability</h4>
                             <div class="skill-badges icon-only">
                                 <span class="skill-icon-wrap" data-name="Prometheus">
-                                    <img class="skill-icon-only" src="icons/Prometheus.png" alt="Prometheus">
+                                    <img class="skill-icon-only" src="images/icons/Prometheus.png" alt="Prometheus">
                                     <span class="skill-label">Prometheus</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Grafana">
-                                    <img class="skill-icon-only" src="icons/Grafana.png" alt="Grafana">
+                                    <img class="skill-icon-only" src="images/icons/Grafana.png" alt="Grafana">
                                     <span class="skill-label">Grafana</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="CloudWatch">
-                                    <img class="skill-icon-only" src="icons/CloudWatch.png" alt="CloudWatch">
+                                    <img class="skill-icon-only" src="images/icons/CloudWatch.png" alt="CloudWatch">
                                     <span class="skill-label">CloudWatch</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Elastic Search">
-                                    <img class="skill-icon-only" src="icons/Elastic Search.png" alt="Elastic Search">
+                                    <img class="skill-icon-only" src="images/icons/Elastic Search.png" alt="Elastic Search">
                                     <span class="skill-label">Elastic Search</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Kibana">
-                                    <img class="skill-icon-only" src="icons/Kibana.png" alt="Kibana">
+                                    <img class="skill-icon-only" src="images/icons/Kibana.png" alt="Kibana">
                                     <span class="skill-label">Kibana</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Logstash">
-                                    <img class="skill-icon-only" src="icons/Logstash.png" alt="Logstash">
+                                    <img class="skill-icon-only" src="images/icons/Logstash.png" alt="Logstash">
                                     <span class="skill-label">Logstash</span>
                                 </span>
                             </div>
@@ -535,27 +537,27 @@
                             <h4>Networking &amp; Security</h4>
                             <div class="skill-badges icon-only">
                                 <span class="skill-icon-wrap" data-name="VPN">
-                                    <img class="skill-icon-only" src="icons/vpn.png" alt="VPN">
+                                    <img class="skill-icon-only" src="images/icons/vpn.png" alt="VPN">
                                     <span class="skill-label">VPN</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="SSL">
-                                    <img class="skill-icon-only" src="icons/ssl.png" alt="SSL">
+                                    <img class="skill-icon-only" src="images/icons/ssl.png" alt="SSL">
                                     <span class="skill-label">SSL</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="TLS">
-                                    <img class="skill-icon-only" src="icons/tls.png" alt="TLS">
+                                    <img class="skill-icon-only" src="images/icons/tls.png" alt="TLS">
                                     <span class="skill-label">TLS</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Cloudflare">
-                                    <img class="skill-icon-only" src="icons/Cloudflare.png" alt="Cloudflare">
+                                    <img class="skill-icon-only" src="images/icons/Cloudflare.png" alt="Cloudflare">
                                     <span class="skill-label">Cloudflare</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Istio">
-                                    <img class="skill-icon-only" src="icons/istio.png" alt="Istio">
+                                    <img class="skill-icon-only" src="images/icons/istio.png" alt="Istio">
                                     <span class="skill-label">Istio</span>
                                 </span>
                                 <span class="skill-icon-wrap" data-name="Nginx">
-                                    <img class="skill-icon-only" src="icons/nginx.png" alt="Nginx">
+                                    <img class="skill-icon-only" src="images/icons/nginx.png" alt="Nginx">
                                     <span class="skill-label">Nginx</span>
                                 </span>
                             </div>
@@ -631,27 +633,27 @@
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Favourites</div>
                     <div class="sidebar-item files-sidebar-item" data-key="airdrop">
-                        <span class="sidebar-icon"><img src="icons/Airdrop.png" alt="AirDrop" /></span>
+                        <span class="sidebar-icon"><img src="images/icons/Airdrop.png" alt="AirDrop" /></span>
                         AirDrop
                     </div>
                     <div class="sidebar-item files-sidebar-item active" data-key="recents">
-                        <span class="sidebar-icon"><img src="icons/recent.png" alt="Recents" /></span>
+                        <span class="sidebar-icon"><img src="images/icons/recent.png" alt="Recents" /></span>
                         Recents
                     </div>
                     <div class="sidebar-item files-sidebar-item" data-key="applications">
-                        <span class="sidebar-icon"><img src="icons/app-store.png" alt="Applications" /></span>
+                        <span class="sidebar-icon"><img src="images/icons/app-store.png" alt="Applications" /></span>
                         Applications
                     </div>
                     <div class="sidebar-item files-sidebar-item" data-key="desktop">
-                        <span class="sidebar-icon"><img src="icons/desktop.png" alt="Desktop" /></span>
+                        <span class="sidebar-icon"><img src="images/icons/desktop.png" alt="Desktop" /></span>
                         Desktop
                     </div>
                     <div class="sidebar-item files-sidebar-item" data-key="documents">
-                        <span class="sidebar-icon"><img src="icons/documents.png" alt="Documents" /></span>
+                        <span class="sidebar-icon"><img src="images/icons/documents.png" alt="Documents" /></span>
                         Documents
                     </div>
                     <div class="sidebar-item files-sidebar-item" data-key="downloads">
-                        <span class="sidebar-icon"><img src="icons/downloads.png" alt="Downloads" /></span>
+                        <span class="sidebar-icon"><img src="images/icons/downloads.png" alt="Downloads" /></span>
                         Downloads
                     </div>
                 </div>
@@ -659,7 +661,7 @@
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">iCloud</div>
                     <div class="sidebar-item files-sidebar-item" data-key="icloud">
-                        <span class="sidebar-icon"><img src="icons/icloud.png" alt="iCloud Drive" /></span>
+                        <span class="sidebar-icon"><img src="images/icons/icloud.png" alt="iCloud Drive" /></span>
                         iCloud Drive
                     </div>
                 </div>
@@ -763,13 +765,13 @@
                 <p>This is a simulated browser window. Here are some quick links:</p>
                 <div class="safari-links">
                     <a href="https://github.com/inboxtoshashi" target="_blank" rel="noopener" class="safari-link" aria-label="GitHub Profile">
-                        <img src="icons/git.png" alt="GitHub" class="safari-link-icon">
+                        <img src="images/icons/git.png" alt="GitHub" class="safari-link-icon">
                     </a>
                     <a href="https://www.linkedin.com/in/shashi-kant-singh-973b5b17b/" target="_blank" rel="noopener" class="safari-link" aria-label="LinkedIn Profile">
-                        <img src="icons/linkdin.png" alt="LinkedIn" class="safari-link-icon">
+                        <img src="images/icons/linkdin.png" alt="LinkedIn" class="safari-link-icon">
                     </a>
                     <a href="https://www.instagram.com/imshashi123/" target="_blank" rel="noopener" class="safari-link" aria-label="Instagram Profile">
-                        <img src="icons/insta.png" alt="Instagram" class="safari-link-icon">
+                        <img src="images/icons/insta.png" alt="Instagram" class="safari-link-icon">
                     </a>
                 </div>
             </div>
@@ -871,10 +873,11 @@
     <script>
         try { console.log('[INLINE] index.html inline script executed'); window.__inline_marker = true; } catch (e) {}
     </script>
-    <script src="finder.js"></script>
-    
-    <script src="script.js"></script>
-    <script src="wallpapers.js"></script>
+    <script src="js/apple-menu.js"></script>
+    <script src="js/visitorWidget.js"></script>
+    <script src="js/finder.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/wallpapers.js"></script>
 </body>
 </body>
 </html>

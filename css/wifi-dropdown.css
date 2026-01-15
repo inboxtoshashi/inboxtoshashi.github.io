@@ -22,14 +22,8 @@
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .wifi-header {
@@ -38,8 +32,9 @@
     align-items: center;
     padding: 8px 12px;
     margin-bottom: 8px;
-    .wifi-dropdown {
-        pointer-events: auto;
+}
+
+.wifi-header .wifi-title {
     font-weight: 600;
     font-size: 15px;
     letter-spacing: -0.2px;
@@ -59,29 +54,19 @@
 }
 
 .toggle-slider {
-    padding: 8px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: auto;
-    background: #30d158;
-    border-radius: 31px;
-    transition: 0.3s;
-    padding: 8px 16px;
+    position: absolute;
+    top: 2px;
+    left: 2px;
     width: 27px;
-    right: 2px;
-    bottom: 2px;
+    height: 27px;
     background-color: white;
     border-radius: 50%;
-    transition: 0.3s;
+    transition: transform 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.wifi-toggle input:not(:checked) + .toggle-slider::before {
-    transform: translateX(-20px);
+.wifi-toggle input:not(:checked) + .toggle-slider {
+    transform: translateX(0);
 }
 
 .wifi-warning {
@@ -109,9 +94,7 @@
     border: 0.5px solid rgba(255, 255, 255, 0.06);
 }
 
-.wifi-section:last-of-type {
-    margin-bottom: 0;
-}
+.wifi-section:last-of-type { margin-bottom: 0; }
 
 .wifi-section-title {
     padding: 6px 8px 4px;
@@ -122,19 +105,15 @@
     letter-spacing: 0.5px;
 }
 
-.wifi-network {8px;
+.wifi-network {
+    padding: 8px 12px;
     cursor: pointer;
     transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 10px;
 }
 
-.wifi-network:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.wifi-network.active {
-    background: rgba(0, 106, 220, 0.5);
-}
+.wifi-network:hover { background: rgba(255, 255, 255, 0.08); }
+.wifi-network.active { background: rgba(0, 106, 220, 0.5); }
 
 .network-info {
     display: flex;
@@ -144,10 +123,7 @@
     min-width: 0;
 }
 
-.network-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-}
+.network-icon { font-size: 16px; flex-shrink: 0; }
 
 .network-name {
     font-size: 13px;
@@ -158,18 +134,11 @@
     text-overflow: ellipsis;
 }
 
-.network-name {
-    font-size: 13px;
-}
-
 .network-status {
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 11px;
-}
-
-    flex-shrink: 0;
 }
 
 .arrow-icon {
@@ -178,35 +147,17 @@
     flex-shrink: 0;
 }
 
-.wifi-network.clickable {
-    cursor: pointer;
-}
+.wifi-network.clickable { cursor: pointer; }
 
-.wifi-footer {
-    padding: 4px 0 0;
-}
-
-.wifi-settings {
-    padding: 10px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 12px;
-    letter-spacing: -0.1px;
-}
-
-.wifi-settings:hover {
-    background: rgba(255, 255, 255, 0.08
-    padding: 8px 0;
-}
+.wifi-footer { padding: 4px 0 0; }
 
 .wifi-settings {
     padding: 8px 16px;
     font-size: 13px;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: background 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    letter-spacing: -0.1px;
 }
 
-.wifi-settings:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
+.wifi-settings:hover { background: rgba(255, 255, 255, 0.08); }
