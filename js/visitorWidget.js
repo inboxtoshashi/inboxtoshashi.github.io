@@ -3,8 +3,8 @@
  * Lightweight vanilla JS visitor stats widget (no React).
  * Usage:
  *   <div id="visitor-root"></div>
- *   <link rel="stylesheet" href="icons/visitor-widget.css">
- *   <script src="icons/visitorWidget.js"></script>
+ *   <link rel="stylesheet" href="css/visitor-widget.css">
+ *   <script src="js/visitorWidget.js"></script>
  *   <script>VisitorWidget.init('#visitor-root', { base: 10567 });</script>
  *
  * Options:
@@ -123,13 +123,13 @@
                         // map browser to icon filename
                         function browserIcon(b, p) {
                             const name = (b || '').toLowerCase();
-                            if (name.includes('safari')) return 'icons/safari.png';
-                            if (name.includes('chrome')) return 'icons/chrome.png';
-                            if (name.includes('edge') || name.includes('edg')) return 'icons/edge.png';
-                            if (name.includes('firefox')) return 'icons/firefox.png';
-                            if (p && p.toLowerCase().includes('mac')) return 'icons/apple.png';
+                            if (name.includes('safari')) return 'images/icons/safari.png';
+                            if (name.includes('chrome')) return 'images/icons/chrome.png';
+                            if (name.includes('edge') || name.includes('edg')) return 'images/icons/edge.png';
+                            if (name.includes('firefox')) return 'images/icons/firefox.png';
+                            if (p && p.toLowerCase().includes('mac')) return 'images/icons/apple.png';
                             // default for other apps/browsers
-                            return 'icons/browser.png';
+                            return 'images/icons/browser.png';
                         }
                         img.src = browserIcon(r.browser, r.platform || '');
                         img.alt = r.browser || 'visitor';
