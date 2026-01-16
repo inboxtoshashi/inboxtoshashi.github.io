@@ -1,11 +1,7 @@
-/* About-specific styles extracted from styles.css
-   Contains layout and presentation for About panes (Skills, Education,
-   Projects, Certifications, Experience). Keeping these here makes maintenance
-   easier and keeps component styles isolated. */
 
-/* Ensure consistent spacing for section headers inside About panes */
+
 .about-pane h2 {
-    /* Center section titles and match Skills header sizing */
+    
     margin: 12px 0 18px;
     font-size: 34px;
     line-height: 1.05;
@@ -13,7 +9,6 @@
     font-weight: 800;
 }
 
-/* Add spacing for the introductory paragraph under About */
 .about-pane[data-pane="about"] > p {
     margin-top: 8px;
     margin-bottom: 28px;
@@ -22,7 +17,6 @@
     max-width: 980px;
 }
 
-/* Education list: aligned dot + title + meta */
 .about-pane .education-list {
     list-style: none;
     margin: 10px 0 0 0;
@@ -55,14 +49,13 @@
     font-size: 15px;
 }
 .about-pane .education-list li::before {
-    display: none; /* disable the generic about-pane list dot for education entries */
+    display: none; 
 }
 
-/* Generic About lists (projects, experience, certifications) */
 .about-pane ul {
     list-style: none;
     margin-left: 0;
-    padding-left: 0; /* use custom bullets */
+    padding-left: 0; 
 }
 .about-pane ul li {
     position: relative;
@@ -83,7 +76,7 @@
 }
 
 .about-pane a {
-    color: #cfe8ff; /* soft light-blue */
+    color: #cfe8ff; 
     text-decoration: none;
     font-weight: 600;
 }
@@ -93,7 +86,6 @@
     text-underline-offset: 3px;
 }
 
-/* Detailed skills list inside About */
 .about-pane .skills-detailed {
     list-style: none;
     margin: 12px 0 0 0;
@@ -129,7 +121,6 @@
     .about-pane .skills-detailed strong { min-width: 140px; display:block; margin-bottom:6px; }
 }
 
-/* Optional skills grid (kept here for a future card/pill layout) */
 .about-pane .skills-list {
     list-style: none;
     margin: 10px 0 0 0;
@@ -148,7 +139,7 @@
     box-shadow: 0 10px 24px rgba(0,0,0,0.45);
     position: relative;
 .about-pane .skill-badges .skill-badge { padding:8px 14px; font-size:15px; }
-    padding-left: 18px; /* space for dot */
+    padding-left: 18px; 
 }
 .about-pane .skills-list li::before {
     content: '';
@@ -177,7 +168,6 @@
     .about-pane .skill-title { flex: 0 0 140px; min-width: 120px; }
 }
 
-/* New badge-style skills layout (matching provided design) */
 .about-pane .skills-header {
     text-align: center;
     margin-bottom: 26px;
@@ -188,7 +178,7 @@
     letter-spacing: 0.5px;
 }
 .about-pane .skills-decor {
-    display:flex; /* center the decor under the header like the Skills header */
+    display:flex; 
     align-items:center;
     justify-content:center;
     gap:18px;
@@ -222,7 +212,7 @@
     gap:48px;
     justify-content:center;
     align-items:flex-start;
-    margin-bottom:26px; /* add gap so columns don't collide with following sections */
+    margin-bottom:26px; 
     flex-wrap:wrap;
 }
 .about-pane .skills-column {
@@ -233,12 +223,12 @@
     text-align:center;
     color:#ffffff;
     font-size:20px;
-    margin-bottom:0; /* keep heading and badges compact */
+    margin-bottom:0; 
 }
 .about-pane .skill-badges {
     display:flex;
     flex-wrap:wrap;
-    gap:28px; /* unified spacing for all badge groups */
+    gap:28px; 
     justify-content:center;
 }
 .about-pane .skill-badge {
@@ -263,7 +253,6 @@
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
 }
 
-/* Icon-only skill badges: icon visible, label appears below on hover */
 .about-pane .skill-badges.icon-only { gap: 28px; }
 .about-pane .skill-icon-wrap {
     display:flex;
@@ -274,7 +263,7 @@
     height:76px;
     cursor:default;
     position:relative;
-    margin-bottom:4px; /* reduce gap so label sits closer to the icon */
+    margin-bottom:4px; 
 }
 .about-pane .skill-icon-only {
     width:44px;
@@ -297,7 +286,7 @@
     padding: 3px 6px;
     border-radius: 6px;
     white-space: nowrap;
-    z-index: 60; /* ensure label appears above nearby icons */
+    z-index: 60; 
     font-size: 70%;
     line-height: 1; 
 }
@@ -313,7 +302,6 @@
     .about-pane .skill-label { bottom: -26px; font-size:13px }
 }
 
-/* Color variants */
 .skill-badge.b-blue{background:#2b89d9}
 .skill-badge.b-dark{background:#1f2937}
 .skill-badge.b-slate{background:#3b82c4}
@@ -355,7 +343,6 @@
     .about-pane .skills-header h2 { font-size:26px; }
 }
 
-/* Detailed resume-style skills list (left-aligned, easy to scan) */
 .about-pane .skills-detail-list {
     max-width: 900px;
     margin: 14px auto 28px;
@@ -380,8 +367,7 @@
 @media (max-width:720px) {
     .about-pane .skills-detail-list { padding-left: 18px; font-size:15px; }
     .about-pane .skills-detail-list li strong { min-width: 140px; display:block; margin-bottom:6px; }
-    
-    /* Mobile responsive layout for About window */
+
     .about-with-sidebar {
         flex-direction: column !important;
     }
@@ -413,7 +399,6 @@
     }
 }
 
-/* Badge-driven categories (cloud, containers, IaC, monitoring, networking) */
 .about-pane .skills-categories {
     max-width: 980px;
     margin: 8px auto 26px;
@@ -425,7 +410,7 @@
     display:flex;
     flex-direction:column;
     gap:8px;
-    align-items: center; /* center headings, badges and descriptions */
+    align-items: center; 
     text-align: center;
 }
 .about-pane .skills-category h4 {
@@ -445,7 +430,7 @@
     display:flex;
     gap:18px 20px;
     flex-wrap:wrap;
-    margin-top:8px; /* provide breathing room between heading and badges */
+    margin-top:8px; 
     justify-content: center;
 }
 

@@ -1,4 +1,4 @@
-/* Preview app styles */
+
 .preview-content {
     background: #121212;
     color: #e0e0e0;
@@ -81,7 +81,6 @@
     font-weight: 600;
 }
 
-/* Ensure iframe container allows scrolling when scaled */
 .preview-area .preview-iframe {
     transform-origin: top left;
     will-change: transform;

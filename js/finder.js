@@ -1,4 +1,4 @@
-/* Finder helper functions (separate file) */
+
 (function(window){
     function formatTagLabel(key) {
         if (!key) return '';
@@ -6,12 +6,12 @@
             const nm = key.replace('tag-', '').replace(/-/g, ' ');
             return nm.charAt(0).toUpperCase() + nm.slice(1);
         }
-        // fallback: capitalize
+        
         return key.charAt(0).toUpperCase() + key.slice(1);
     }
 
     function renderAllTags(container, onSelectTag) {
-        // container is the filesGrid element
+        
         container.innerHTML = '';
         const wrap = document.createElement('div');
         wrap.className = 'all-tags-wrap';
@@ -42,7 +42,7 @@
 
         const right = document.createElement('div');
         right.className = 'all-tags-right';
-        // intentionally leave right column blank for the All Tags view
+        
         right.innerHTML = '';
 
         wrap.appendChild(left);
@@ -56,20 +56,16 @@
     };
 })(window);
 
-    // Finder initialization and UI logic moved here from script.js
     (function(window){
         function initializeFiles(win) {
             const sidebarItems = win.querySelectorAll('.files-sidebar-item');
-            // Ensure Finder opens to Recents by default when a new Finder window is created
+            
             const initial = win.querySelector('.files-sidebar-item[data-key="recents"]');
             if (initial) {
                 sidebarItems.forEach(i => i.classList.remove('active'));
                 initial.classList.add('active');
             }
-                // Visitor widget is intentionally not injected into Finder UI.
-                // The widget will be initialized only when the Spy app is opened.
-            // No need to replace SVGs with PNGs; HTML now uses PNGs directly
-            // Make sidebar sections collapsible (attach handlers to titles)
+
             (function initializeSidebarCollapsibleInFinder(){
                 const sections = win.querySelectorAll('.sidebar-section');
                 sections.forEach(section => {
@@ -82,13 +78,13 @@
                     });
                 });
             })();
-            // Ensure AirDrop sidebar label uses 'AirDrop' capitalization
+            
             (function ensureAirdropLabel(){
                 const airdrop = Array.from(sidebarItems).find(i => i.dataset.key === 'airdrop');
                 if (!airdrop) return;
                 const iconSpan = airdrop.querySelector('.sidebar-icon');
                 if (iconSpan) {
-                    // rebuild node so label text is exactly 'AirDrop'
+                    
                     airdrop.innerHTML = '';
                     airdrop.appendChild(iconSpan);
                     airdrop.appendChild(document.createTextNode('AirDrop'));
@@ -105,13 +101,13 @@
             let historyStack = [];
             let forwardStack = [];
             let currentKey = 'recents';
-            // timeout handle for delayed AirDrop rendering
+            
             let airdropTimeout = null;
 
             function clearAirdropTimeout(){
                 if (airdropTimeout) { clearTimeout(airdropTimeout); airdropTimeout = null; }
             }
-            // view mode and search elements
+            
             const viewButtons = win.querySelectorAll('.finder-view-btn');
             const searchInput = win.querySelector('#finderSearch');
             let currentView = 'icon';
@@ -136,7 +132,6 @@
                 });
             }
 
-            // wire view button clicks
             viewButtons.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -145,7 +140,6 @@
                 });
             });
 
-            // wire search input
             if (searchInput) {
                 searchInput.addEventListener('input', (e) => {
                     applyFinderSearch(e.target.value);
@@ -167,7 +161,7 @@
                 clearGrid();
                 const empty = document.createElement('div');
                 empty.className = 'finder-empty';
-                // Render an intentionally blank centered area (no text)
+                
                 empty.innerHTML = ``;
                 gridElement.appendChild(empty);
             }
@@ -177,27 +171,30 @@
                 const apps = [
                     { src: 'images/doc-app/docker.png', name: 'Docker' },
                     { src: 'images/doc-app/calender.png', name: 'Calendar', app: 'calendar' },
-                    { src: 'images/doc-app/safari.png', name: 'Safari', app: 'safari', href: 'https://www.apple.com/safari' },
-                    { src: 'images/icons/spy.png', name: 'Spy', app: 'spy' }
+                    { src: 'images/doc-app/safari.png', name: 'Safari', app: 'safari', href: 'https://www.google.com' },
+                    { src: 'images/icons/spy.png', name: 'Spy', app: 'spy' },
+                    { src: 'images/icons/puzzle.png', name: 'Puzzle Game', app: 'puzzle', emoji: '🧩' }
                 ];
-
-                // Applications are icon-only; no details panel
 
                 apps.forEach(a => {
                     const tile = document.createElement('div');
                     tile.className = 'doc-tile app-compact';
+                    
+                    let iconHtml = '';
+                    if (a.emoji) {
+                        iconHtml = `<div class="doc-icon" style="font-size: 48px; display: flex; align-items: center; justify-content: center;">${a.emoji}</div>`;
+                    } else {
+                        iconHtml = `<div class="doc-icon"><img src="${a.src}" alt="${a.name}" style="object-fit:contain;border-radius:8px;"></div>`;
+                    }
+                    
                     tile.innerHTML = `
-                        <div class="doc-icon">
-                            <img src="${a.src}" alt="${a.name}" style="object-fit:contain;border-radius:8px;">
-                        </div>
+                        ${iconHtml}
                         <div class="doc-name">${a.name}</div>
                     `;
 
-                    // Click behavior: open external link when provided; otherwise no details
-                    // Click behavior: open app if configured, otherwise open external link
                     tile.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        // Open Spy as a separate window (same behavior as Dock)
+                        
                         if (a.app === 'spy' && typeof window.openApp === 'function') {
                             window.openApp('spy');
                             return;
@@ -212,7 +209,6 @@
                     gridElement.appendChild(tile);
                 });
 
-                // Helper: show/hide an inline Spy panel above the grid
                 function ensureSpyPanel() {
                     let panel = win.querySelector('.spy-inline-panel');
                     if (panel) return panel;
@@ -236,7 +232,6 @@
                     const existing = win.querySelector('.spy-inline-panel');
                     if (existing) { removeSpyPanel(); return; }
 
-                    // ensure CSS loaded
                     if (!document.querySelector('link[href*="visitor-widget.css"]')) {
                         const link = document.createElement('link');
                         link.rel = 'stylesheet';
@@ -246,7 +241,6 @@
 
                     const panel = ensureSpyPanel();
 
-                    // initialize widget into the infinder root (pass the element directly)
                     const rootEl = panel.querySelector('#visitor-root-infinder');
                     if (!window.VisitorWidget) {
                         const s = document.createElement('script');
@@ -260,9 +254,7 @@
                     }
                 }
 
-                // no details container for applications
             }
-
 
             function renderDocuments() {
                 clearGrid();
@@ -283,12 +275,11 @@
                     }, 80);
                 });
 
-                // try to generate PDF thumbnail using PDF.js if available
                 (function tryPdfThumb() {
                     const thumbEl = tile.querySelector('.doc-thumb');
                     if (!thumbEl) return;
                     if (window.pdfjsLib && window.pdfjsLib.getDocument) {
-                        // Ensure workerSrc is set and disable worker fetch to avoid worker-side font requests
+                        
                         try { if (pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; } catch (e) {}
                         const url = 'files/Shashi_Kant_Singh.pdf';
                         const loadingTask = pdfjsLib.getDocument({ url: url, useWorkerFetch: false });
@@ -317,13 +308,12 @@
                                 thumbEl.appendChild(img);
                             }
                         }).catch(err => {
-                            // ignore, keep fallback
+                            
                             console.error('PDF thumbnail failed', err);
                         });
                     }
                 })();
 
-                // add image onerror fallback to avoid broken image when missing
                 const img = tile.querySelector('img');
                 if (img) {
                     img.addEventListener('error', () => {
@@ -345,7 +335,7 @@
 
                 const avatar = document.createElement('div');
                 avatar.className = 'airdrop-avatar';
-                // prefer a local avatar image if provided, otherwise show emoji
+                
                 (function(){
                     const img = document.createElement('img');
                     img.alt = 'avatar';
@@ -365,7 +355,7 @@
                 appear.textContent = 'Appear as';
                 const name = document.createElement('div');
                 name.className = 'airdrop-name';
-                // show Guest as requested (capitalized)
+                
                 name.textContent = 'Guest';
 
                 info.appendChild(appear);
@@ -377,8 +367,6 @@
                 const center = document.createElement('div');
                 center.className = 'airdrop-center';
 
-                // inner container allows precise positioning of the
-                // central message. It may be populated later (delayed).
                 const centerInner = document.createElement('div');
                 centerInner.className = 'airdrop-center-inner';
 
@@ -399,7 +387,6 @@
                 const footer = document.createElement('div');
                 footer.className = 'airdrop-footer';
 
-                // create two separate lines so we can control wrapping independently
                 const line1 = document.createElement('div');
                 line1.className = 'airdrop-footer-line1';
                 line1.textContent = 'AirDrop lets you share instantly with people nearby.';
@@ -422,7 +409,6 @@
                 gridElement.appendChild(root);
             }
 
-            // Match other app icon sizes to Safari's displayed size for consistent look
             (function matchToSafari() {
                 const safariImg = gridElement.querySelector('img[alt="Safari"]');
                 if (!safariImg) return;
@@ -445,9 +431,8 @@
                 }
             })();
 
-            // Update toolbar left label / tag dot and back visibility
             function updateToolbarForKey(key) {
-                // determine title
+                
                 let title = ({
                     'airdrop': 'AirDrop',
                     'recents': 'Recents',
@@ -461,12 +446,11 @@
                     'tags-all': 'All Tags'
                 }[key] || key);
 
-                // If this is a tag (e.g., 'tag-green'), show a cleaned, capitalized title like 'Green'
                 if (key && key.startsWith('tag-')) {
                     if (window.finderHelpers && typeof window.finderHelpers.formatTagLabel === 'function') {
                         title = window.finderHelpers.formatTagLabel(key);
                     } else {
-                        // Fallback: strip 'tag-' and capitalize
+                        
                         title = key.replace('tag-', '').replace(/-/g, ' ');
                         title = title.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
                     }
@@ -475,7 +459,7 @@
                 if (pathElement) pathElement.textContent = title;
 
                 const forwardBtn = win.querySelector('#finderForward');
-                // Show back/forward as visible but disabled when no history
+                
                 if (backBtn) {
                     backBtn.disabled = !historyStack.length;
                     backBtn.style.opacity = historyStack.length ? '1' : '0.45';
@@ -487,7 +471,6 @@
                     forwardBtn.style.pointerEvents = forwardStack.length ? 'auto' : 'none';
                 }
 
-                // If tag, show dot and small label next to back button; else if folder show small label
                 if (key && key.startsWith('tag-')) {
                     const tagName = window.finderHelpers && window.finderHelpers.formatTagLabel ? window.finderHelpers.formatTagLabel(key) : key.replace('tag-', '').replace(/-/g, ' ');
                     if (leftLabel) { leftLabel.textContent = tagName; leftLabel.hidden = false; }
@@ -504,7 +487,6 @@
                     if (tagDot) tagDot.hidden = true;
                 }
 
-                // Disable (visually + interactively) the right-hand toolbar controls when viewing AirDrop
                 try {
                     const rightControls = win.querySelector('.finder-right-controls');
                     if (rightControls) {
@@ -526,22 +508,20 @@
                         }
                     }
                 } catch (e) {
-                    // ignore if DOM not available
+                    
                 }
             }
 
-            // Render view for a given key
             function renderMainContent(key, pushHistory = false) {
                 if (pushHistory && currentKey && currentKey !== key) {
                     historyStack.push(currentKey);
-                    // new navigation clears forward stack
+                    
                     forwardStack = [];
                 }
 
                 currentKey = key;
                 updateToolbarForKey(key);
 
-                // clear any pending AirDrop render when navigating elsewhere
                 clearAirdropTimeout();
 
                 if (key === 'applications') {
@@ -549,11 +529,10 @@
                 } else if (key === 'documents') {
                     renderDocuments();
                 } else if (key === 'tags-all') {
-                    // Render the All Tags two-column view
+                    
                     if (window.finderHelpers && typeof window.finderHelpers.renderAllTags === 'function') {
                         window.finderHelpers.renderAllTags(gridElement, (tagKey) => {
-                            // Do NOT navigate away from All Tags. Instead update the top title
-                            // and the small left label/dot to reflect the selected tag.
+
                             const format = window.finderHelpers && typeof window.finderHelpers.formatTagLabel === 'function'
                                 ? window.finderHelpers.formatTagLabel
                                 : (k) => {
@@ -563,10 +542,8 @@
 
                             const tagName = format(tagKey);
 
-                            // Update center title
                             if (pathElement) pathElement.textContent = tagName;
 
-                            // Update small left label and colored dot
                             if (leftLabel) { leftLabel.textContent = tagName; leftLabel.hidden = false; }
                             if (tagDot) {
                                 tagDot.hidden = false;
@@ -574,7 +551,6 @@
                                 tagDot.style.background = (lc === 'red' ? '#ff3b30' : lc === 'orange' ? '#ff9500' : lc === 'yellow' ? '#ffd60a' : lc === 'green' ? '#34c759' : lc === 'blue' ? '#0a84ff' : lc === 'purple' ? '#af52de' : '#8e8e93');
                             }
 
-                            // Visually mark selected row in All Tags list
                             const rows = gridElement.querySelectorAll('.all-tags-row');
                             rows.forEach(r => r.classList.remove('selected'));
                             const match = Array.from(rows).find(r => (r.textContent || '').trim().startsWith(tagName));
@@ -584,8 +560,7 @@
                         renderEmpty('Nothing here');
                     }
                 } else if (key === 'airdrop') {
-                    // render AirDrop shell immediately (top/footer) but delay
-                    // inserting the central message for 5s
+
                     clearGrid();
                     renderAirdrop(false);
                     clearAirdropTimeout();
@@ -604,13 +579,13 @@
                         airdropTimeout = null;
                     }, 2000);
                 } else if (key === 'desktop') {
-                    // Show the documents placed on the Desktop (reuse documents renderer)
+                    
                     renderDocuments();
                 } else if (key && key.startsWith('tag-')) {
-                    // For tags, clear the main area, keep left label, but hide the colored dot
+                    
                     clearGrid();
                     if (tagDot) tagDot.hidden = true;
-                    // Hide any tab/underline bar if present
+                    
                     const tabBar = win.querySelector('.finder-tabs, .finder-tab-bar, .finder-tag-bar');
                     if (tabBar) tabBar.style.display = 'none';
                 } else if (key === 'downloads' || key === 'icloud' || key === 'shared' || key === 'recents' || key === 'cursor') {
@@ -619,23 +594,21 @@
                     renderEmpty('Nothing here');
                 }
 
-                // Re-apply search filter after rendering if a search is active
                 try {
                     if (typeof applyFinderSearch === 'function' && searchInput) applyFinderSearch(searchInput.value);
                 } catch (e) {
-                    // ignore
+                    
                 }
             }
 
-            // Back button handler
             if (backBtn) {
                 backBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (!historyStack.length) return;
-                    // push current into forward stack, then navigate back
+                    
                     forwardStack.push(currentKey);
                     const prev = historyStack.pop() || 'recents';
-                    // set active sidebar item
+                    
                     sidebarItems.forEach(i => i.classList.remove('active'));
                     const sel = Array.from(sidebarItems).find(i => i.dataset.key === prev);
                     if (sel) sel.classList.add('active');
@@ -643,13 +616,12 @@
                 });
             }
 
-            // Forward button handler
             const forwardBtnEl = win.querySelector('#finderForward');
             if (forwardBtnEl) {
                 forwardBtnEl.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (!forwardStack.length) return;
-                    // push current into history and navigate forward
+                    
                     historyStack.push(currentKey);
                     const nxt = forwardStack.pop();
                     sidebarItems.forEach(i => i.classList.remove('active'));
@@ -659,18 +631,16 @@
                 });
             }
 
-            // Wire sidebar clicks
             sidebarItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     const key = item.dataset.key;
-                    // update active class
+                    
                     sidebarItems.forEach(i => i.classList.remove('active'));
                     item.classList.add('active');
                     renderMainContent(key, true);
                 });
             });
 
-            // Keyboard navigation: Left = back, Right = forward when this Finder window is focused
             win.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') {
                     const backBtn = win.querySelector('#finderBack');
@@ -681,9 +651,8 @@
                 }
             });
 
-            // Initial view
             renderMainContent('recents', false);
-            // Ensure initial view mode applied
+            
             try { setFinderViewMode(currentView); } catch (e) {}
         }
 

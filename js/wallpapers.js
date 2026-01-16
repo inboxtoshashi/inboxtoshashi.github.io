@@ -1,4 +1,4 @@
-// Wallpaper Management System
+
 const wallpapers = [
     {
         id: 1,
@@ -128,47 +128,44 @@ const wallpapers = [
     }
 ];
 
-// Current wallpaper — prefer the macOS Ventura image if it exists in the wallpapers folder
 const defaultImagePath = 'images/wallpapers/macos-ventura.jpg';
 const defaultWallpaper = wallpapers.find(w => w.type === 'image' && w.value && w.value.includes('macos-ventura')) || wallpapers.find(w => w.type === 'image' && w.value && w.value === defaultImagePath) || { id: 0, name: 'macos-ventura', type: 'image', value: defaultImagePath };
 let currentWallpaper = defaultWallpaper;
 
-// Initialize wallpaper system
 function initializeWallpapers() {
-    // Load saved wallpaper from localStorage
+    
     const savedWallpaper = localStorage.getItem('selectedWallpaper');
     if (savedWallpaper) {
         const wallpaper = wallpapers.find(w => w.id === parseInt(savedWallpaper));
-        // If user previously selected an image wallpaper, honor it. If it was a gradient, prefer the default macOS image instead.
+        
         if (wallpaper) {
-            // If the saved wallpaper is an image or video, apply it directly.
+            
             if (wallpaper.type === 'image' || wallpaper.type === 'video') {
                 currentWallpaper = wallpaper;
                 applyWallpaper(currentWallpaper);
             } else {
-                // saved wallpaper is a gradient (or unknown); prefer the macOS Ventura image by default
+                
                 if (defaultWallpaper) applyWallpaper(defaultWallpaper);
             }
         } else {
             if (defaultWallpaper) applyWallpaper(defaultWallpaper);
         }
     } else {
-        // No saved wallpaper: but if a video element was already injected (by an earlier handler), honor it
+        
             const existingVideo = document.getElementById('desktop-video-wallpaper');
             if (existingVideo) {
-                // Try to find the matching wallpaper entry and set it as current
+                
                 const match = wallpapers.find(w => w.type === 'video' && existingVideo.src && existingVideo.src.includes(w.value));
                 if (match) {
                     currentWallpaper = match;
                     try { localStorage.setItem('selectedWallpaper', match.id); } catch (e) {}
                     return;
                 } else {
-                    // A video exists but does not match our list; leave it alone
+                    
                     return;
                 }
             }
 
-            // No saved wallpaper and no existing injected video: apply the default wallpaper (macos-ventura) if present
             if (defaultWallpaper) {
                 applyWallpaper(defaultWallpaper);
             } else {
@@ -177,7 +174,6 @@ function initializeWallpapers() {
     }
 }
 
-// Apply wallpaper
 function applyWallpaper(wallpaper) {
     const desktop = document.querySelector('.desktop');
     
@@ -190,22 +186,20 @@ function applyWallpaper(wallpaper) {
         desktop.style.background = wallpaper.value;
         console.log('Applied gradient:', wallpaper.name);
     } else if (wallpaper.type === 'image') {
-        // remove any existing video wallpaper
+        
         const existingVideo = document.getElementById('desktop-video-wallpaper');
         if (existingVideo && existingVideo.parentNode) existingVideo.parentNode.removeChild(existingVideo);
 
         desktop.style.background = `url('${wallpaper.value}') center/cover no-repeat`;
         console.log('Applied image:', wallpaper.name);
     } else if (wallpaper.type === 'video') {
-        // Remove CSS background (override stylesheet)
+        
         desktop.style.background = 'none';
         desktop.style.backgroundImage = 'none';
 
-        // Remove any existing video first
         let existing = document.getElementById('desktop-video-wallpaper');
         if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
 
-        // Create video element
         const vid = document.createElement('video');
         vid.id = 'desktop-video-wallpaper';
         vid.src = wallpaper.value;
@@ -222,15 +216,14 @@ function applyWallpaper(wallpaper) {
         vid.style.zIndex = '0';
         vid.style.pointerEvents = 'none';
 
-        // Ensure desktop is positioned so absolute video sits behind content
         const prevPosition = getComputedStyle(desktop).position;
         if (prevPosition === 'static' || !prevPosition) desktop.style.position = 'relative';
 
         desktop.insertBefore(vid, desktop.firstChild);
-        // Attempt to play (some browsers require user interaction)
+        
         vid.play().catch(() => {
             console.warn('Autoplay prevented for wallpaper video; it will remain paused until user interacts.');
-            // Add a one-time resume on the next user interaction (click/tap/keydown)
+            
             const resume = () => {
                 vid.play().catch(() => {});
                 document.removeEventListener('click', resume);
@@ -245,16 +238,14 @@ function applyWallpaper(wallpaper) {
     }
     
     currentWallpaper = wallpaper;
-    
-    // Save to localStorage
+
     localStorage.setItem('selectedWallpaper', wallpaper.id);
-    // Refresh vibrancy if available
+    
     if (typeof window.ccVibrancyRefresh === 'function') {
         window.ccVibrancyRefresh();
     }
 }
 
-// Change wallpaper
 function changeWallpaper(wallpaperId) {
     const wallpaper = wallpapers.find(w => w.id === wallpaperId);
     if (wallpaper) {
@@ -262,7 +253,6 @@ function changeWallpaper(wallpaperId) {
     }
 }
 
-// Add custom wallpaper from file
 function addCustomWallpaper(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -274,20 +264,17 @@ function addCustomWallpaper(file) {
         };
         
         wallpapers.push(customWallpaper);
-        
-        // Update settings if open
+
         const settingsWindow = document.querySelector('.window[data-app="settings"]');
         if (settingsWindow) {
             renderWallpaperGrid();
         }
-        
-        // Apply immediately
+
         applyWallpaper(customWallpaper);
     };
     reader.readAsDataURL(file);
 }
 
-// Render wallpaper grid in settings
 function renderWallpaperGrid() {
     const container = document.querySelector('.wallpaper-grid');
     if (!container) return;
@@ -319,16 +306,14 @@ function renderWallpaperGrid() {
         
         item.addEventListener('click', () => {
             changeWallpaper(wallpaper.id);
-            
-            // Update active state
+
             document.querySelectorAll('.wallpaper-item').forEach(w => w.classList.remove('active'));
             item.classList.add('active');
         });
         
         container.appendChild(item);
     });
-    
-    // Add custom upload button
+
     const uploadItem = document.createElement('div');
     uploadItem.className = 'wallpaper-item upload-item';
     uploadItem.innerHTML = `
@@ -353,7 +338,6 @@ function renderWallpaperGrid() {
     container.appendChild(uploadItem);
 }
 
-// Export functions
 window.wallpaperSystem = {
     initialize: initializeWallpapers,
     change: changeWallpaper,
@@ -363,7 +347,6 @@ window.wallpaperSystem = {
     getCurrent: () => currentWallpaper
 };
 
-// If a `cat_in_rain.mp4` video exists in the wallpapers list, apply it on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     try {
         const videoWallpaper = wallpapers.find(w => w.type === 'video' && w.value && w.value.includes('cat_in_rain.mp4'));

@@ -1,4 +1,4 @@
-/* Apple menu box styles */
+
 .apple-menu-list {
     display: flex;
     flex-direction: column;
@@ -26,7 +26,7 @@
     align-self: center;
     border-radius: 1px;
 }
-/* Compact Lock Screen button styles */
+
 .lock-btn-compact {
     display: flex;
     align-items: center;
@@ -51,7 +51,7 @@
     font-weight: 600;
     letter-spacing: 0.01em;
 }
-/* Apple menu drop-down and lock preview fade transitions */
+
 .apple-menu {
     opacity: 0;
     visibility: hidden;
@@ -73,7 +73,6 @@
     visibility: visible;
     transition-delay: 0s;
 }
-/* Apple menu (mac-icon) specific styles extracted from styles.css */
 
 .apple-logo {
     font-size: 18px;

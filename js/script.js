@@ -1,20 +1,18 @@
-// (Removed duplicate Control Center toggle logic; see initializeControlCenter below)
-// Temporary runtime diagnostics: boot log and global error handlers
-// script.js loaded
+
+
 window.addEventListener('error', (ev) => {
     try { console.error('Runtime error', ev.message, ev.filename + ':' + ev.lineno + ':' + ev.colno, ev.error); } catch (e) {}
 });
 window.addEventListener('unhandledrejection', (ev) => {
     try { console.error('Unhandled rejection', ev.reason); } catch (e) {}
 });
-// Window Management
+
 let windows = [];
-let zIndexCounter = 1000; // Start above dock (z-index: 900)
+let zIndexCounter = 1000; 
 let activeWindow = null;
-// Track cascade placement index to avoid opening windows at random positions
+
 window.__openWindowCascadeIndex = window.__openWindowCascadeIndex || 0;
 
-// App Configurations
 const appConfigs = {
     about: { title: '👤 About Me', width: 700, height: 600 },
     terminal: { title: '⌨️ Terminal', width: 700, height: 500 },
@@ -26,11 +24,12 @@ const appConfigs = {
     settings: { title: '⚙️ Settings', width: 700, height: 550 }
     ,calendar: { title: '📅 Calendar', width: 520, height: 420 }
     ,spy: { title: '🕵️ Spy', width: 760, height: 460 }
+    ,trash: { title: 'Trash', width: 650, height: 500 }
+    ,puzzle: { title: '🧩 Puzzle', width: 540, height: 580 }
 };
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-        // Add PDF desktop shortcut
+        
         const desktop = document.querySelector('.desktop');
         if (desktop && !document.querySelector('.desktop-shortcut.pdf-resume')) {
             const shortcut = document.createElement('div');
@@ -48,12 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try { positionDesktopShortcuts(); } catch (e) {}
         }
 
-        // Helper to open PDF in Preview app (robust: wait for window element)
         function openDesktopPdf(filePath) {
             openApp('preview');
-            // wait for the preview window element to exist, then initialize
+            
             const start = Date.now();
-            const timeout = 2000; // ms
+            const timeout = 2000; 
             (function waitForPreview() {
                 const winEntry = (window.windows || windows || []).find(w => w.appName === 'preview');
                 const previewEl = winEntry ? winEntry.element : document.querySelector('.window[data-app="preview"]');
@@ -68,13 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })();
         }
-    // menu-icon click logging removed to reduce noisy debug output
+    
     initializeDock();
     updateDateTime();
     setInterval(updateDateTime, 1000);
     initializeWiFiDropdown();
     initializeFullscreen();
-    // Restore desktop context menu (right-click) handler
+    
     function createDesktopContextMenu() {
         let menu = document.querySelector('.desktop-context-menu');
         if (menu) return menu;
@@ -94,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ev.stopPropagation();
             hideDesktopContextMenu();
             if (action === 'new-folder') {
-                // create a placeholder folder shortcut using an existing icon
+                
                 const folder = document.createElement('div');
                 folder.className = 'desktop-shortcut';
                 const iconHtml = `<div class="desktop-shortcut-icon"><img src="images/icons/desktop.png" alt="Folder"/></div>`;
@@ -105,17 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 label.textContent = 'New Folder';
                 folder.innerHTML = iconHtml;
                 folder.appendChild(label);
-                // append then position so measurements work
+                
                 const desktopEl = document.querySelector('.desktop');
                 desktopEl?.appendChild(folder);
-                // ensure correct stacking/position immediately after adding
+                
                 requestAnimationFrame(() => {
                     try { positionDesktopShortcuts(); } catch (e) {}
                 });
-                // focus and select the label so user can rename immediately
+                
                 setTimeout(() => {
                     label.focus();
-                    // select all text
+                    
                     const range = document.createRange();
                     range.selectNodeContents(label);
                     const sel = window.getSelection();
@@ -124,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 60);
 
                 function commitLabel() {
-                    // sanitize and ensure non-empty
+                    
                     const name = (label.textContent || '').trim() || 'New Folder';
                     label.textContent = name;
                     label.contentEditable = 'false';
@@ -138,14 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         label.blur();
                     } else if (ev.key === 'Escape') {
                         ev.preventDefault();
-                        // revert name
+                        
                         label.textContent = 'New Folder';
                         label.blur();
                     }
                 });
 
             } else if (action === 'get-info') {
-                // Open About window and show social links + mailto
+                
                 openApp('about');
                 setTimeout(() => {
                     const winEntry = (window.windows || windows || []).find(w => w.appName === 'about');
@@ -153,10 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!aboutEl) return;
                     const wrapper = aboutEl.querySelector('.window-content-wrapper');
                     if (!wrapper) return;
-                    // Prefer to append links into the existing about content to preserve styles
+                    
                     const aboutContent = wrapper.querySelector('.about-content') || wrapper;
-                    // Removed appended "Connect with me" links per user request
-                    // previously we appended a resume summary here; removed per user request
+
                 }, 300);
             }
         });
@@ -169,16 +166,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (menu) menu.style.display = 'none';
     }
 
-    // Global contextmenu handler to intercept right-clicks on the desktop
     document.addEventListener('contextmenu', (e) => {
         try {
             const desktopEl = document.querySelector('.desktop');
             if (!desktopEl) return;
-            // Only intercept if the right-click occurred on the desktop itself
+            
             if (e.target && e.target.closest && e.target.closest('.desktop') && !e.target.closest('.window')) {
                 e.preventDefault();
                 const menu = createDesktopContextMenu();
-                // position menu within viewport bounds
+                
                 const mw = menu.offsetWidth || 220;
                 const mh = menu.offsetHeight || 180;
                 const left = Math.min(e.clientX, window.innerWidth - mw - 8);
@@ -187,20 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 menu.style.top = top + 'px';
                 menu.style.display = 'block';
 
-                // hide on next click or escape
                 const onDocClick = () => { hideDesktopContextMenu(); document.removeEventListener('click', onDocClick); };
                 document.addEventListener('click', onDocClick);
                 const onEsc = (ev) => { if (ev.key === 'Escape') { hideDesktopContextMenu(); document.removeEventListener('keydown', onEsc); } };
                 document.addEventListener('keydown', onEsc);
             }
         } catch (err) {
-            // fail silently
+            
         }
     });
 });
 
-// Attempt to load the best-matching icon file for each `.skill-icon-only` image.
-// This makes icon selection robust to filename case/spacing differences (e.g. "Terraform" -> Terraform.png).
 function resolveSkillIcons() {
     const extCandidates = ['.png', '.svg', '.webp', '.PNG'];
     const alias = {
@@ -228,14 +221,11 @@ function resolveSkillIcons() {
         const img = wrap.querySelector('img.skill-icon-only');
         if (!img) return;
 
-        // Build ordered candidate list
         const candidates = [];
         const lower = name.toLowerCase();
 
-        // explicit aliases first
         if (alias[lower]) candidates.push(...alias[lower]);
 
-        // common variants derived from name
         const variants = new Set([
             name,
             name.replace(/\s+/g, '-'),
@@ -249,42 +239,36 @@ function resolveSkillIcons() {
 
         variants.forEach(v => {
             if (!v) return;
-            // try with extension and plain
+            
             extCandidates.forEach(ext => candidates.push(v + ext));
             candidates.push(v);
         });
 
-        // ensure uniqueness
         const ordered = Array.from(new Set(candidates));
 
-        // Try each candidate by attempting to load it; use first that succeeds
         (function tryNext(i) {
-            if (i >= ordered.length) return; // no candidate found
+            if (i >= ordered.length) return; 
             const src = 'images/icons/' + ordered[i];
             const tester = new Image();
             tester.onload = function() {
-                // found working icon — update img src
+                
                 img.src = src;
-                // update alt if missing
+                
                 if (!img.alt || img.alt.toLowerCase() === 'image') img.alt = name;
             };
             tester.onerror = function() {
                 tryNext(i + 1);
             };
-            // start loading
+            
             tester.src = src;
         })(0);
     });
 }
 
-// Reposition shortcuts on resize and when datetime updates
 window.addEventListener('resize', () => {
     try { positionDesktopShortcuts(); } catch (e) {}
 });
 
-// Mobile launcher removed - dock icons are now visible on mobile
-
-// Update Date Time
 function updateDateTime() {
     const now = new Date();
     const options = { 
@@ -297,54 +281,48 @@ function updateDateTime() {
     };
     const dateStr = now.toLocaleString('en-US', options);
     document.getElementById('datetime').textContent = dateStr;
-    // Reposition desktop shortcut in case menu bar height or content changed
+    
     try { positionDesktopShortcuts(); } catch (e) {}
 }
 
-// Position desktop shortcuts under the menu bar to avoid overlap.
 function positionDesktopShortcuts() {
     try {
-        // Do not reposition while the UI is locked — menu bar may be hidden
+        
         if (document.body.classList && document.body.classList.contains('locked')) return;
 
         const menuBar = document.querySelector('.menu-bar');
         const shortcuts = document.querySelectorAll('.desktop-shortcut');
         if (!menuBar || !shortcuts) return;
         const rect = menuBar.getBoundingClientRect();
-        const baseTop = Math.ceil(rect.bottom + 12); // 12px gap
+        const baseTop = Math.ceil(rect.bottom + 12); 
         const gap = 12;
         const baseRight = 18;
         const desktopHeight = window.innerHeight;
-        // Estimate shortcut height (use first shortcut or fallback)
+        
         let shortcutHeight = 96;
         if (shortcuts.length > 0) {
             shortcutHeight = Math.ceil(shortcuts[0].getBoundingClientRect().height) || shortcuts[0].offsetHeight || 96;
         }
-        // Calculate max shortcuts per column
-        const availableHeight = desktopHeight - baseTop - 24; // 24px bottom margin
+        
+        const availableHeight = desktopHeight - baseTop - 24; 
         const maxPerCol = Math.max(1, Math.floor(availableHeight / (shortcutHeight + gap)));
 
-        // Position shortcuts in columns, top to bottom, then next column
         const list = Array.from(shortcuts);
         list.forEach((s, idx) => {
             const col = Math.floor(idx / maxPerCol);
             const row = idx % maxPerCol;
             s.style.position = 'absolute';
             s.style.top = (baseTop + row * (shortcutHeight + gap)) + 'px';
-            s.style.right = (baseRight + col * (shortcutHeight + 32)) + 'px'; // 32px gap between columns
+            s.style.right = (baseRight + col * (shortcutHeight + 32)) + 'px'; 
             s.style.left = '';
             const hasWindows = Array.isArray(window.windows) ? window.windows.length > 0 : (typeof windows !== 'undefined' ? windows.length > 0 : false);
             s.style.zIndex = hasWindows ? '50' : '150';
         });
     } catch (e) {
-        // silently ignore
+        
     }
 }
 
-// Small on-screen toast for quick diagnostics (temporary)
-/* debug toast removed */
-
-// Make sidebar sections collapsible: click the section title to toggle
 function initializeSidebarCollapsible() {
     document.querySelectorAll('.sidebar-section').forEach(section => {
         const title = section.querySelector('.sidebar-section-title');
@@ -357,11 +335,10 @@ function initializeSidebarCollapsible() {
     });
 }
 
-// Lock screen: show/hide overlay and update clock
 document.addEventListener('DOMContentLoaded', () => {
     const lockBtn = document.getElementById('lockScreenBtn');
     const lockOverlay = document.getElementById('lockScreen');
-    // Shared fallbacks so show/hide can't race and re-add `locked` unexpectedly
+    
     let lockShowFallback = null;
     let lockHideFallback = null;
 
@@ -371,33 +348,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeEl = lockOverlay.querySelector('.lock-time');
         const dateEl = lockOverlay.querySelector('.lock-date');
         if (timeEl) {
-            // Show hour:minute without AM/PM (strip day period) to match lock-screen style
+            
             let t = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
             t = t.replace(/\s?(AM|PM)$/i, '');
             timeEl.textContent = t;
         }
         if (dateEl) {
-            // Use en-GB ordering to show: 'Sunday, 11 January'
+            
             dateEl.textContent = now.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
         }
     }
 
     function showLockScreen() {
         if (!lockOverlay) return;
-        // lock show requested
-        // Clear any transient unlocking state, then set aria and add show class to trigger CSS transition
+
         document.body.classList.remove('unlocking');
-        // reduce heavy effects while animating to improve performance
+        
         document.body.classList.add('reduce-effects');
-        // immediately fade UI chrome so it doesn't flash during the overlay fade
+        
             document.body.classList.add('locking');
-            // allow UI chrome to be displayed (remove `locked`) immediately so elements can repaint
+            
             document.body.classList.remove('locked');
         lockOverlay.setAttribute('aria-hidden', 'false');
         lockOverlay.classList.add('show');
-        // Wait for the opacity transition to complete before applying `locked`
-        // so the UI hidden-by-locked doesn't jump in mid-fade.
-        // clear any pending hide fallback (we're showing)
+
         if (lockHideFallback) { clearTimeout(lockHideFallback); lockHideFallback = null; }
         let showFallback = null;
         const onTransitionEnd = (ev) => {
@@ -405,12 +379,12 @@ document.addEventListener('DOMContentLoaded', () => {
             lockOverlay.removeEventListener('transitionend', onTransitionEnd);
             if (showFallback) { clearTimeout(showFallback); showFallback = null; }
             document.body.classList.add('locked');
-            // remove the temporary locking fade (locked will actually hide the UI)
+            
             document.body.classList.remove('locking');
             try { lockOverlay.querySelector('.lock-center')?.focus(); } catch (e) {}
         };
         lockOverlay.addEventListener('transitionend', onTransitionEnd);
-        // Fallback: ensure `locked` is applied even if transitionend doesn't fire
+        
         lockShowFallback = setTimeout(() => {
             lockOverlay.removeEventListener('transitionend', onTransitionEnd);
             document.body.classList.add('locked');
@@ -423,20 +397,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideLockScreen() {
         if (!lockOverlay) return;
-        // lock hide requested
-        // cancel any pending show fallback so it doesn't re-apply `locked`
+
         if (lockShowFallback) { clearTimeout(lockShowFallback); lockShowFallback = null; }
-        // ensure UI chrome becomes displayable, switch to `unlocking` so it fades in
+        
         document.body.classList.remove('locked');
         document.body.classList.remove('locking');
         document.body.classList.add('unlocking');
-        // ensure the browser has the current layout state, then trigger fade-out
+        
         try { lockOverlay.getBoundingClientRect(); } catch (e) {}
         requestAnimationFrame(() => {
             lockOverlay.classList.remove('show');
         });
 
-        // Use transitionend so we remove locked/reduce-effects right after fade finishes
         let hideFallback = null;
         const onEnd = (ev) => {
             if (ev.target !== lockOverlay || ev.propertyName !== 'opacity') return;
@@ -445,13 +417,13 @@ document.addEventListener('DOMContentLoaded', () => {
             lockOverlay.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('locked');
             document.body.classList.remove('reduce-effects');
-            // remove temporary locking/unlocking fade
+            
             document.body.classList.remove('locking');
             document.body.classList.remove('unlocking');
             try { positionDesktopShortcuts(); } catch (e) {}
         };
         lockOverlay.addEventListener('transitionend', onEnd);
-        // Fallback: ensure cleanup occurs if transitionend is missed — match CSS duration (220ms) + buffer
+        
         lockHideFallback = setTimeout(() => {
             lockOverlay.removeEventListener('transitionend', onEnd);
             lockOverlay.setAttribute('aria-hidden', 'true');
@@ -464,52 +436,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 320);
     }
 
-    // attach handlers
     if (lockBtn) lockBtn.addEventListener('click', (e) => { e.stopPropagation(); showLockScreen(); });
 
-    // Clicking anywhere on the lock overlay or pressing Escape dismisses it
     if (lockOverlay) {
         lockOverlay.addEventListener('click', (e) => {
-            // unlock on any click within the overlay
+            
             hideLockScreen();
         });
-        // ensure initial DOM state has overlay hidden
+        
         lockOverlay.classList.remove('visible');
         lockOverlay.setAttribute('aria-hidden', 'true');
     }
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideLockScreen(); });
 
-    // keep clock updated while visible
     setInterval(() => {
         if (lockOverlay && lockOverlay.classList && lockOverlay.classList.contains('show')) updateLockTime();
     }, 1000);
-    
-    // Expose showLockScreen to global scope for apple menu access
+
     window.showLockScreen = showLockScreen;
 });
 
-// Collapsible search: show lens icon and expand to input on click
 function initializeCollapsibleSearch() {
     const container = document.getElementById('finderSearchContainer');
     const toggle = document.getElementById('finderSearchToggle');
     const input = document.getElementById('finderSearch');
     if (!container || !toggle || !input) return;
 
-    // Toggle expand on lens click
     toggle.addEventListener('click', (e) => {
         e.stopPropagation();
         container.classList.add('search-expanded');
         setTimeout(() => input.focus(), 80);
     });
 
-    // Collapse when clicking outside
     document.addEventListener('click', (e) => {
         if (!container.contains(e.target)) {
             container.classList.remove('search-expanded');
         }
     });
 
-    // Collapse on Escape
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             container.classList.remove('search-expanded');
@@ -518,34 +482,59 @@ function initializeCollapsibleSearch() {
     });
 }
 
-// Initialize Dock
 function initializeDock() {
     const dockApps = document.querySelectorAll('.dock-app');
     dockApps.forEach(app => {
         app.addEventListener('click', () => {
             const appName = app.dataset.app;
-            openApp(appName);
+
+            const windowData = windows.find(w => w.appName === appName);
+            if (windowData && windowData.element && windowData.element.classList.contains('minimized')) {
+                
+                restoreFromDock(appName);
+            } else {
+                
+                openApp(appName);
+            }
         });
 
-        // small restore overlay on dock hover removed (UI simplified)
     });
+
+    const dockTrash = document.querySelector('.dock-trash');
+    if (dockTrash) {
+        dockTrash.addEventListener('click', () => {
+            const appName = 'trash';
+
+            const windowData = windows.find(w => w.appName === appName);
+            if (windowData && windowData.element && windowData.element.classList.contains('minimized')) {
+                
+                restoreFromDock(appName);
+            } else {
+                
+                openApp('trash');
+            }
+        });
+    }
 }
 
-// Add minimized app to dock
 function addToDock(window) {
     const appName = window.dataset.app;
     const dynamicContainer = document.getElementById('dockDynamicApps');
-    
-    // Check if already in dock
+
+    const staticDockIcon = document.querySelector(`.dock-app[data-app="${appName}"]:not(.dock-app-minimized), .dock-trash[data-app="${appName}"]`);
+    if (staticDockIcon) {
+        
+        staticDockIcon.classList.add('minimized-indicator');
+        return;
+    }
+
     if (dynamicContainer.querySelector(`[data-app="${appName}"]`)) {
         return;
     }
-    
-    // Get app icon from window or create generic icon
+
     const appConfig = appConfigs[appName];
     const appTitle = appConfig ? appConfig.title : appName;
-    
-    // Map app names to their icon paths
+
     const iconMap = {
         'calendar': 'images/doc-app/calender.png',
         'terminal': 'images/doc-app/terminal.png',
@@ -555,19 +544,24 @@ function addToDock(window) {
         'spy': 'images/icons/spy.png',
         'about': 'images/icons/user.png',
         'contact': 'images/icons/email.png',
-        'settings': 'images/icons/settings.png'
+        'settings': 'images/icons/settings.png',
+        'trash': 'images/doc-app/bin.png',
+        'puzzle': '🧩'
     };
     
     const iconPath = iconMap[appName] || 'images/icons/app.png';
-    
-    // Create dock icon
+
     const dockIcon = document.createElement('div');
     dockIcon.className = 'dock-app dock-app-minimized';
     dockIcon.dataset.app = appName;
     dockIcon.title = `${appTitle} (minimized)`;
-    dockIcon.innerHTML = `<div class="app-icon"><img src="${iconPath}" alt="${appName}" style="width: 48px; height: 48px; object-fit: contain;" /></div>`;
     
-    // Click handler to restore window
+    if (appName === 'puzzle') {
+        dockIcon.innerHTML = `<div class="app-icon" style="font-size: 32px; display: flex; align-items: center; justify-content: center;">🧩</div>`;
+    } else {
+        dockIcon.innerHTML = `<div class="app-icon"><img src="${iconPath}" alt="${appName}" style="width: 48px; height: 48px; object-fit: contain;" /></div>`;
+    }
+
     dockIcon.addEventListener('click', (e) => {
         e.stopPropagation();
         restoreFromDock(appName);
@@ -576,17 +570,21 @@ function addToDock(window) {
     dynamicContainer.appendChild(dockIcon);
 }
 
-// Restore minimized app from dock
 function restoreFromDock(appName) {
     const windowData = windows.find(w => w.appName === appName);
     if (windowData && windowData.element) {
         windowData.element.classList.remove('minimized');
         focusWindow(windowData.element);
+
+        const staticDockIcon = document.querySelector(`.dock-app[data-app="${appName}"]:not(.dock-app-minimized), .dock-trash[data-app="${appName}"]`);
+        if (staticDockIcon) {
+            staticDockIcon.classList.remove('minimized-indicator');
+        }
+        
         removeFromDock(appName);
     }
 }
 
-// Remove app from dynamic dock area
 function removeFromDock(appName) {
     const dynamicContainer = document.getElementById('dockDynamicApps');
     const dockIcon = dynamicContainer.querySelector(`[data-app="${appName}"]`);
@@ -595,12 +593,11 @@ function removeFromDock(appName) {
     }
 }
 
-// Open Application
 function openApp(appName) {
-    // Prevent rapid repeated opens: track apps currently being opened
+    
     window.__openingApps = window.__openingApps || {};
     if (window.__openingApps[appName]) {
-        // If a window already exists, focus it; otherwise ignore the extra open
+        
         const existingWindow = windows.find(w => w.appName === appName);
         if (existingWindow) {
             if (existingWindow.element.classList.contains('minimized')) existingWindow.element.classList.remove('minimized');
@@ -611,10 +608,9 @@ function openApp(appName) {
     }
     window.__openingApps[appName] = true;
 
-    // On mobile: only show one window at a time
     const isMobile = globalThis.innerWidth <= 720;
     if (isMobile) {
-        // Hide all other windows
+        
         windows.forEach(w => {
             if (w.appName !== appName && w.element) {
                 w.element.style.display = 'none';
@@ -622,22 +618,21 @@ function openApp(appName) {
         });
     }
 
-    // Check if app is already open
     const existingWindow = windows.find(w => w.appName === appName);
     if (existingWindow) {
-        // Show this window and hide others on mobile
+        
         if (isMobile) {
             windows.forEach(w => {
                 w.element.style.display = (w.appName === appName) ? 'flex' : 'none';
             });
         }
-        // Always bring to top and un-minimize
+        
         if (existingWindow.element.classList.contains('minimized')) {
             existingWindow.element.classList.remove('minimized');
         }
         existingWindow.element.style.display = 'flex';
         focusWindow(existingWindow.element);
-        // Fire event so launcher can update
+        
         window.dispatchEvent(new Event('appWindowChange'));
         delete window.__openingApps[appName];
         return;
@@ -647,16 +642,14 @@ function openApp(appName) {
     if (!config) return;
 
     const windowElement = createWindow(appName, config);
-    
-    // Ensure new window has highest z-index before adding to DOM
+
     windowElement.style.zIndex = zIndexCounter++;
     
     document.getElementById('windowsContainer').appendChild(windowElement);
 
-    // If opening Safari on small screens, pin it under the menu bar so it's always visible
     try {
         if (appName === 'safari' && globalThis.innerWidth <= 720) {
-            // Use CSS calc with safe-area so it respects notches and browser chrome
+            
             windowElement.style.left = '0px';
             windowElement.style.top = 'calc(env(safe-area-inset-top, 0px) + 48px)';
             windowElement.style.width = '100%';
@@ -666,81 +659,65 @@ function openApp(appName) {
         }
     } catch (e) { console.error('Failed to pin safari window on mobile', e); }
 
-    // Load content
     loadWindowContent(windowElement, appName);
 
-    // Add to windows array
     windows.push({
         appName: appName,
         element: windowElement,
         isMaximized: false
     });
-    // clear the opening flag now that the window exists
+    
     try { delete window.__openingApps[appName]; } catch(e) {}
-    // Fire event so launcher can update
+    
     window.dispatchEvent(new Event('appWindowChange'));
 
-    // Mark dock app as active
     const dockApp = document.querySelector(`.dock-app[data-app="${appName}"]`);
     if (dockApp) dockApp.classList.add('active');
 
-    // Listen for window close to re-enable launcher button
     windowElement.addEventListener('remove', () => {
         setTimeout(() => window.dispatchEvent(new Event('appWindowChange')), 100);
     });
 
-    // Focus the new window and ensure it's on top
     focusWindow(windowElement);
-    // Double-check z-index is highest (defensive coding)
-    windowElement.style.zIndex = zIndexCounter++;
     
-    // Reposition desktop shortcuts so they remain under the newly opened window
+    windowElement.style.zIndex = zIndexCounter++;
+
     try { positionDesktopShortcuts(); } catch (e) {}
 }
 
-// Create Window
 function createWindow(appName, config) {
     const winEl = document.createElement('div');
     winEl.className = 'window';
     winEl.dataset.app = appName;
 
-    // Determine centered + cascading placement to avoid random offscreen windows
     const vw = Math.max(320, globalThis.innerWidth || 1024);
     const vh = Math.max(240, globalThis.innerHeight || 768);
     const w = Math.min(config.width, vw - 24);
     const h = Math.min(config.height, vh - 120);
-    
-    // On mobile, windows are fullscreen so no cascade needed
+
     const isMobile = vw <= 720;
     let left, top;
     
     if (isMobile) {
-        // Mobile: position at top-left (CSS will override to fullscreen anyway)
         left = 0;
         top = 48;
     } else {
-        // Desktop: use cascade positioning
-        const centerX = Math.max(12, Math.floor((vw - w) / 2));
-        const centerY = Math.max(12, Math.floor((vh - h) / 2));
         const cascadeIndex = (windows && windows.length) ? windows.length : (window.__openWindowCascadeIndex || 0);
-        const cascadeOffset = Math.min(200, cascadeIndex * 45);
-        left = Math.max(12, Math.min(centerX + cascadeOffset, vw - w - 12));
-        top = Math.max(48, Math.min(centerY + cascadeOffset, vh - h - 48));
+        const cascadeOffset = Math.min(200, cascadeIndex * 30);
+        left = Math.max(12, Math.min(50 + cascadeOffset, vw - w - 12));
+        top = Math.max(48, Math.min(80 + cascadeOffset, vh - h - 48));
     }
 
     winEl.style.width = w + 'px';
     winEl.style.height = h + 'px';
     winEl.style.left = left + 'px';
     winEl.style.top = top + 'px';
-    // z-index will be set when window is added to DOM
-    // allow keyboard focus for window-level keyboard handling
+
     winEl.tabIndex = 0;
 
-    // Title bar
     const titleBar = document.createElement('div');
     titleBar.className = 'window-titlebar';
 
-    // For Safari, show a small safari.png icon next to the title
     let titleHtml = '';
     if (appName === 'safari') {
         titleHtml = `<div class="window-title"><img src="images/doc-app/safari.png" alt="Safari" class="window-app-icon"> Safari</div>`;
@@ -758,29 +735,24 @@ function createWindow(appName, config) {
         <div style="width: 52px;"></div>
     `;
 
-    // Content area
     const content = document.createElement('div');
     content.className = 'window-content-wrapper';
 
     winEl.appendChild(titleBar);
     winEl.appendChild(content);
 
-    // Add event listeners
     addWindowEventListeners(winEl, titleBar);
 
-    // increment global cascade index for next window
     try { window.__openWindowCascadeIndex = (window.__openWindowCascadeIndex || 0) + 1; } catch (e) {}
 
     return winEl;
 }
 
-// Add Window Event Listeners
 function addWindowEventListeners(window, titleBar) {
-    // Focus on click or touch
+    
     window.addEventListener('mousedown', () => focusWindow(window));
     window.addEventListener('touchstart', () => focusWindow(window), { passive: true });
 
-    // Dragging - only on title bar
     let isDragging = false;
     let currentX, currentY, initialX, initialY;
 
@@ -818,14 +790,12 @@ function addWindowEventListeners(window, titleBar) {
         document.removeEventListener('mouseup', stopDrag);
     }
 
-    // Resizing - from edges and corners
     let isResizing = false;
     let resizeDirection = '';
     let startX, startY, startWidth, startHeight, startLeft, startTop;
 
-    const RESIZE_BORDER = 8; // pixels from edge to trigger resize
+    const RESIZE_BORDER = 8; 
 
-    // Helper function to check if near edge
     function isNearEdge(e) {
         const rect = window.getBoundingClientRect();
         const atTop = e.clientY - rect.top < RESIZE_BORDER;
@@ -835,14 +805,12 @@ function addWindowEventListeners(window, titleBar) {
         return { atTop, atBottom, atLeft, atRight, any: atTop || atBottom || atLeft || atRight };
     }
 
-    // Track mouse position to update cursor
     window.addEventListener('mousemove', (e) => {
         if (isResizing) return;
         
         const rect = window.getBoundingClientRect();
         const edge = isNearEdge(e);
-        
-        // Update cursor style
+
         if ((edge.atTop || edge.atBottom) && (edge.atLeft || edge.atRight)) {
             window.style.cursor = edge.atTop ? (edge.atLeft ? 'nwse-resize' : 'nesw-resize') : (edge.atLeft ? 'nesw-resize' : 'nwse-resize');
         } else if (edge.atTop || edge.atBottom) {
@@ -854,17 +822,14 @@ function addWindowEventListeners(window, titleBar) {
         }
     });
 
-    // Handle resize start
     window.addEventListener('mousedown', (e) => {
-        // Don't resize if clicking on buttons, title
+        
         if (e.target.closest('.window-btn') || e.target.closest('.window-title')) return;
         
         const edge = isNearEdge(e);
-        
-        // Only start resize if at edge
+
         if (!edge.any) return;
-        
-        // Don't resize if clicking on interactive content (links, buttons, inputs)
+
         if (e.target.closest('a') || e.target.closest('button') || e.target.closest('input')) return;
         
         isResizing = true;
@@ -911,8 +876,7 @@ function addWindowEventListeners(window, titleBar) {
         if (resizeDirection.includes('bottom')) {
             newHeight = startHeight + deltaY;
         }
-        
-        // Minimum window size
+
         if (newWidth < 300) {
             newWidth = 300;
             if (resizeDirection.includes('left')) newLeft = startLeft + (startWidth - 300);
@@ -943,7 +907,6 @@ function addWindowEventListeners(window, titleBar) {
         document.removeEventListener('mouseup', stopResize);
     }
 
-    // Window controls
     const minimizeBtn = titleBar.querySelector('.minimize');
     const maximizeBtn = titleBar.querySelector('.maximize');
     const closeBtn = titleBar.querySelector('.close');
@@ -972,26 +935,21 @@ function addWindowEventListeners(window, titleBar) {
     });
 }
 
-// Focus Window
 function focusWindow(window) {
-    // Remove active class from all windows
+    
     document.querySelectorAll('.window').forEach(w => {
         w.classList.remove('active');
     });
-    
-    // Add active class to the focused window
+
     window.classList.add('active');
-    
-    // Bring window to front with a new z-index
+
     window.style.zIndex = zIndexCounter++;
     activeWindow = window;
 }
 
-// Close Window
 function closeWindow(window) {
     const appName = window.dataset.app;
-    
-    // Destroy any widget instance attached to this window to stop timers
+
     try {
         if (window._visitorWidgetInstance && typeof window._visitorWidgetInstance.destroy === 'function') {
             window._visitorWidgetInstance.destroy();
@@ -999,22 +957,17 @@ function closeWindow(window) {
         }
     } catch (e) { console.error('Error destroying visitor widget on close', e); }
 
-    // Remove from windows array
     windows = windows.filter(w => w.element !== window);
-    
-    // Remove active class from dock
+
     const dockApp = document.querySelector(`.dock-app[data-app="${appName}"]`);
     if (dockApp) dockApp.classList.remove('active');
-    
-    // Remove dynamic dock icon if exists
+
     removeFromDock(appName);
-    
-    // Remove window element
+
     window.remove();
     try { positionDesktopShortcuts(); } catch (e) {}
 }
 
-// Load Window Content
 function loadWindowContent(window, appName) {
     const template = document.getElementById(`${appName}-template`);
     if (!template) return;
@@ -1023,7 +976,6 @@ function loadWindowContent(window, appName) {
     const clone = template.content.cloneNode(true);
     content.appendChild(clone);
 
-    // Initialize app-specific functionality
     if (appName === 'terminal') {
         initializeTerminal(window);
     } else if (appName === 'contact') {
@@ -1031,28 +983,32 @@ function loadWindowContent(window, appName) {
     } else if (appName === 'settings') {
         initializeSettings(window);
     } else if (appName === 'files') {
-        // Call the finder initializer from finder.js if available
+        
         if (window.initializeFiles && typeof window.initializeFiles === 'function') {
             window.initializeFiles(window);
         } else if (typeof initializeFiles === 'function') {
-            // fallback if function still exists in this file
+            
             initializeFiles(window);
         }
     } else if (appName === 'preview') {
         initializePreview(window);
+    } else if (appName === 'trash') {
+        initializeTrash(window);
+    } else if (appName === 'puzzle') {
+        initializePuzzle(window);
     } else if (appName === 'about') {
-        // initialize About window (tabs)
+        
         try { initializeAbout(window); } catch (e) {}
     } else if (appName === 'calendar') {
         initializeCalendar(window);
     } else if (appName === 'spy') {
-        // Initialize Spy app: load visitor widget into this window's `#visitor-root`
+        
         try {
             const headerLink = document.querySelector('link[href*="visitor-widget.css"]');
             if (!headerLink) {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
-                // Append cache-busting query so updated CSS loads immediately
+                
                 link.href = 'css/visitor-widget.css?v=' + Date.now();
                 document.head.appendChild(link);
             }
@@ -1060,16 +1016,16 @@ function loadWindowContent(window, appName) {
             function initVisitorRoot() {
                 const root = window.querySelector('#visitor-root') || window.querySelector('.visitor-root');
                 if (!root) return;
-                // If an instance already exists on this window, destroy it first
+                
                 try { if (window._visitorWidgetInstance && typeof window._visitorWidgetInstance.destroy === 'function') { window._visitorWidgetInstance.destroy(); window._visitorWidgetInstance = null; } } catch (e) { console.error('error destroying previous widget', e); }
 
                     if (!globalThis.VisitorWidget) {
                     const s = document.createElement('script');
-                    // Cache-bust the widget script so browser picks up latest changes
+                    
                     s.src = 'js/visitorWidget.js?v=' + Date.now();
                     s.onload = function () {
                         try { window._visitorWidgetInstance = globalThis.VisitorWidget.init(root, { base: 10567 }); } catch (e) { console.error(e); }
-                        // after init, handle per-user increment via cache
+                        
                         tryLocalIncrement(window._visitorWidgetInstance);
                     };
                     document.body.appendChild(s);
@@ -1078,31 +1034,28 @@ function loadWindowContent(window, appName) {
                     tryLocalIncrement(window._visitorWidgetInstance);
                 }
 
-                // Test increment removed — widget will show active session by default
             }
 
-            // Wait a tick to ensure template content is attached
             setTimeout(initVisitorRoot, 40);
             
                     function tryLocalIncrement(widgetInstance) {
                         try {
                             const key = 'visitor_counted_v1';
-                            // If already counted in this browser, do nothing
+                            
                             if (localStorage.getItem(key)) return;
-                            // mark as counted in local cache
+                            
                             localStorage.setItem(key, String(Date.now()));
 
-                            // Small helper: parse a simple browser + OS string from the UA
                             function parseUserAgent() {
                                 const ua = navigator.userAgent || '';
                                 const platform = navigator.platform || '';
                                 let browser = 'Unknown';
                                 if (/OPR|Opera/.test(ua)) browser = 'Opera';
                                 else if (/Edg\b|Edge\b/.test(ua)) browser = 'Edge';
-                                else if (/Chrome\//.test(ua) && !/Chromium\//.test(ua)) browser = 'Chrome';
-                                else if (/CriOS\//.test(ua)) browser = 'Chrome (iOS)';
-                                else if (/Firefox\//.test(ua)) browser = 'Firefox';
-                                else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = 'Safari';
+                                else if (/Chrome/.test(ua)) browser = 'Chrome';
+                                else if (/CriOS/.test(ua)) browser = 'Chrome';
+                                else if (/Firefox/.test(ua)) browser = 'Firefox';
+                                else if (/Safari/.test(ua)) browser = 'Safari';
 
                                 let os = 'Unknown';
                                 if (/Win/.test(platform) || /Windows/.test(ua)) os = 'Windows';
@@ -1116,16 +1069,14 @@ function loadWindowContent(window, appName) {
 
                             const client = parseUserAgent();
 
-                            // Prefer server increment endpoint if available
-                            // Attempt a POST to /api/visitors/increment; if it fails, fall back to local UI update
                             fetch('/api/visitors/increment', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ amount: 1, client: client }) })
                                 .then(r => {
                                     if (!r.ok) throw new Error('no increment endpoint');
-                                    // server will update total; widget will poll if configured, otherwise we can refresh
+                                    
                                     return r.json().catch(()=>null);
                                 })
                                 .catch(() => {
-                                    // fallback: increment local widget UI immediately
+                                    
                                     try {
                                         if (widgetInstance && typeof widgetInstance.add === 'function') {
                                             const when = new Date().toLocaleTimeString();
@@ -1140,7 +1091,6 @@ function loadWindowContent(window, appName) {
     }
 }
 
-// Initialize About window tabs and interactions
 function initializeAbout(windowEl) {
     const container = windowEl.querySelector('.about-content') || windowEl;
     if (!container) return;
@@ -1157,11 +1107,10 @@ function initializeAbout(windowEl) {
             showTab(name);
         });
     });
-    // default
+    
     showTab('about');
 }
 
-// Initialize a simple calendar view inside the calendar window
 function initializeCalendar(windowEl) {
     const container = windowEl.querySelector('.calendar-root');
     const monthLabel = windowEl.querySelector('#calendarMonthLabel');
@@ -1171,7 +1120,6 @@ function initializeCalendar(windowEl) {
 
     const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-    // Keep state on the window element so subsequent opens preserve view
     if (!windowEl._calendarState) {
         const now = new Date();
         windowEl._calendarState = { year: now.getFullYear(), month: now.getMonth() };
@@ -1234,21 +1182,17 @@ function initializeCalendar(windowEl) {
         render();
     }
 
-    // Wire controls
     if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); changeMonth(-1); };
     if (nextBtn) nextBtn.onclick = (e) => { e.stopPropagation(); changeMonth(1); };
 
-    // Keyboard navigation when this window is focused
     windowEl.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') { changeMonth(-1); }
         else if (e.key === 'ArrowRight') { changeMonth(1); }
     });
 
-    // initial render
     render();
 }
 
-// Initialize Preview app
 function initializePreview(window, filePath) {
     const iframe = window.querySelector('#previewIframe');
     const title = window.querySelector('.window-title');
@@ -1256,14 +1200,14 @@ function initializePreview(window, filePath) {
     filePath = filePath || defaultPath;
 
     if (iframe) {
-        // Try fetching the PDF and load via blob URL for better reliability
+        
         fetch(filePath)
             .then(resp => {
                 if (!resp.ok) throw new Error('Network response was not ok');
                 return resp.blob();
             })
             .then(blob => {
-                // create a File with a filename so browser PDF viewers show the proper name
+                
                 try {
                     const filename = (filePath || defaultPath).split('/').pop() || 'document.pdf';
                     const fileObj = new File([blob], filename, { type: blob.type });
@@ -1271,7 +1215,7 @@ function initializePreview(window, filePath) {
                     console.debug('initializePreview blobUrl', blobUrl);
                     iframe.src = blobUrl;
                 } catch (e) {
-                    // fallback to blob URL if File constructor isn't supported
+                    
                     const blobUrl = URL.createObjectURL(blob);
                     console.debug('initializePreview blobUrl (fallback)', blobUrl);
                     iframe.src = blobUrl;
@@ -1279,20 +1223,18 @@ function initializePreview(window, filePath) {
             })
             .catch(err => {
                 console.error('Failed to load PDF via fetch, falling back to direct src:', err);
-                iframe.src = filePath; // fallback
+                iframe.src = filePath; 
             });
-    // ...existing code...
 
     if (title) {
         title.textContent = filePath.split('/').pop();
     }
 
-    // Update the small path label in the preview toolbar (show filename or 'Resume')
     try {
         const pathLabel = window.querySelector('.preview-path');
         if (pathLabel) {
             const name = (filePath || defaultPath).split('/').pop() || 'Resume';
-            // show a nicer label
+            
             pathLabel.textContent = name.replace(/_/g, ' ');
         }
         } catch (err) {
@@ -1305,7 +1247,6 @@ function initializePreview(window, filePath) {
     const zoomLabel = window.querySelector('#previewZoomLabel');
     const previewArea = window.querySelector('.preview-area');
 
-    // Initial scale
     let scale = 1;
     const minScale = 0.5;
     const maxScale = 3.0;
@@ -1315,11 +1256,10 @@ function initializePreview(window, filePath) {
         scale = Math.max(minScale, Math.min(maxScale, s));
         
         if (iframe) {
-            // Apply CSS transform to zoom the iframe
+            
             iframe.style.transform = `scale(${scale})`;
             iframe.style.transformOrigin = '0 0';
-            
-            // Adjust container size to accommodate scaled content and enable scrolling
+
             if (previewArea) {
                 const scaledWidth = 100 / scale;
                 const scaledHeight = 100 / scale;
@@ -1331,7 +1271,6 @@ function initializePreview(window, filePath) {
         if (zoomLabel) zoomLabel.textContent = `${Math.round(scale * 100)}%`;
     }
 
-    // Wire up buttons
     if (zoomOutBtn) zoomOutBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         applyScale(scale - step);
@@ -1347,16 +1286,70 @@ function initializePreview(window, filePath) {
         applyScale(1);
     });
 
-    // Ensure initial application of scale after load
     if (iframe) {
         iframe.addEventListener('load', () => {
-            // small delay to ensure viewer rendered
+            
             setTimeout(() => applyScale(scale), 100);
         });
     }
+
+    const resizeObserver = new ResizeObserver(() => {
+        applyScale(scale);
+    });
+    if (window) {
+        resizeObserver.observe(window);
+    }
 }
 
-// Terminal Functionality
+function initializeTrash(window) {
+    const trashGrid = window.querySelector('#trashGrid');
+    if (!trashGrid) return;
+
+    const trashFile = {
+        name: 'data.txt',
+        type: 'text',
+        icon: 'images/icons/txt.png',
+        size: '0 KB',
+        date: new Date().toLocaleDateString()
+    };
+    
+    function renderTrash() {
+        trashGrid.innerHTML = '';
+
+        const fileItem = document.createElement('div');
+        fileItem.className = 'doc-item';
+        fileItem.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        `;
+        
+        fileItem.innerHTML = `
+            <div style="margin-bottom: 8px;">
+                <img src="${trashFile.icon}" alt="${trashFile.name}" style="width: 64px; height: 64px; object-fit: contain;" />
+            </div>
+            <div style="font-size: 12px; text-align: center; word-break: break-word; color: #e0e0e0;">${trashFile.name}</div>
+        `;
+        
+        fileItem.addEventListener('mouseenter', () => {
+            fileItem.style.background = 'rgba(255, 255, 255, 0.05)';
+        });
+        
+        fileItem.addEventListener('mouseleave', () => {
+            fileItem.style.background = 'transparent';
+        });
+        
+        trashGrid.appendChild(fileItem);
+    }
+    
+    renderTrash();
+}
+
 function initializeTerminal(window) {
     const input = window.querySelector('.terminal-input');
     const output = window.querySelector('.terminal-output');
@@ -1416,7 +1409,7 @@ Music/      Videos/       Projects/     README.md`;
             return 'guest';
         },
         uname: () => {
-            return 'Darwin 23.4.0 x86_64'; // Simulate macOS uname
+            return 'Darwin 23.4.0 x86_64'; 
         },
         cat: (args) => {
             if (!args || args.length === 0) {
@@ -1450,14 +1443,12 @@ Created with ❤️ using HTML, CSS, and JavaScript.`;
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             const command = input.value.trim();
-            
-            // Add command to output
+
             const commandLine = document.createElement('div');
             commandLine.className = 'terminal-line';
             commandLine.innerHTML = `<span class="terminal-prompt">guest@guest-MacBook-Air ~ %</span> <span class="terminal-text">${command}</span>`;
             output.appendChild(commandLine);
 
-            // Process command
             if (command) {
                 const parts = command.split(' ');
                 const cmd = parts[0];
@@ -1483,34 +1474,26 @@ Created with ❤️ using HTML, CSS, and JavaScript.`;
                 }
             }
 
-            // Removed empty line to eliminate extra space between terminal lines
-
-            // Clear input
             input.value = '';
 
-            // Scroll to bottom
             output.scrollTop = output.scrollHeight;
         }
     });
 
-    // Focus input
     input.focus();
 
-    // Always focus input when window is clicked or focused
     window.addEventListener('mousedown', () => {
         setTimeout(() => input.focus(), 0);
     });
 }
 
-// Contact Form Functionality
 function initializeContactForm(window) {
     const form = window.querySelector('.contact-form');
     const submitBtn = form.querySelector('.btn-submit');
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        // Simulate form submission
+
         submitBtn.textContent = 'Sending...';
         submitBtn.disabled = true;
 
@@ -1523,24 +1506,21 @@ function initializeContactForm(window) {
     });
 }
 
-// Settings Functionality
 function initializeSettings(window) {
-    // Render wallpaper grid
+    
     if (window.wallpaperSystem) {
         window.wallpaperSystem.render();
     }
-    
-    // Handle sidebar navigation
+
     const sidebarItems = window.querySelectorAll('.settings-item');
     const mainSection = window.querySelector('.settings-main');
     
     sidebarItems.forEach(item => {
         item.addEventListener('click', () => {
-            // Remove active class from all items
+            
             sidebarItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            
-            // Update main content based on selection
+
             const itemText = item.textContent;
             
             if (itemText.includes('Desktop')) {
@@ -1584,7 +1564,6 @@ function initializeSettings(window) {
     });
 }
 
-// VS Code Functionality
 function initializeVSCode(window) {
     const fileContents = {
         'index.html': `<span class="code-comment">&lt;!-- Welcome to my portfolio! --&gt;</span>
@@ -1600,7 +1579,7 @@ function initializeVSCode(window) {
 <span class="code-keyword">&lt;/body&gt;</span>
 <span class="code-keyword">&lt;/html&gt;</span>`,
 
-        'styles.css': `<span class="code-comment">/* macOS Desktop Portfolio Styles */</span>
+        'styles.css': `<span class="code-comment"></span>
 
 <span class="code-keyword">body</span> {
     <span class="code-string">font-family</span>: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -1615,14 +1594,14 @@ function initializeVSCode(window) {
     <span class="code-string">background</span>: <span class="code-function">linear-gradient</span>(<span class="code-string">135deg, #667eea, #764ba2</span>);
 }
 
-<span class="code-comment">/* Window Styles */</span>
+<span class="code-comment"></span>
 <span class="code-keyword">.window</span> {
     <span class="code-string">position</span>: <span class="code-string">absolute</span>;
     <span class="code-string">border-radius</span>: <span class="code-string">8px</span>;
     <span class="code-string">box-shadow</span>: <span class="code-string">0 10px 40px rgba(0,0,0,0.4)</span>;
 }`,
 
-        'script.js': `<span class="code-comment">// Welcome to my portfolio!</span>
+        'script.js': `<span class="code-comment">
 <span class="code-keyword">function</span> <span class="code-function">createAwesomeProject</span>() {
     <span class="code-keyword">const</span> skills = [<span class="code-string">'JavaScript'</span>, <span class="code-string">'Python'</span>, <span class="code-string">'React'</span>];
     <span class="code-keyword">return</span> skills.<span class="code-function">map</span>(skill => {
@@ -1630,7 +1609,7 @@ function initializeVSCode(window) {
     });
 }
 
-<span class="code-comment">// Always learning, always building</span>
+<span class="code-comment">
 console.<span class="code-function">log</span>(<span class="code-string">'Hello, World!'</span>);`,
 
         'README.md': `<span class="code-comment"># macOS Desktop Portfolio</span>
@@ -1656,32 +1635,25 @@ console.<span class="code-function">log</span>(<span class="code-string">'Hello,
     
     files.forEach(file => {
         file.addEventListener('click', () => {
-            // Remove active class from all files
+            
             files.forEach(f => f.classList.remove('active'));
             file.classList.add('active');
-            
-            // Get filename
+
             const filename = file.textContent.trim().replace('📄 ', '');
-            
-            // Update tab
+
             tabContainer.innerHTML = `<div class="vscode-tab active">${filename}</div>`;
-            
-            // Update code content
+
             if (fileContents[filename]) {
                 codeArea.innerHTML = fileContents[filename];
             }
         });
     });
-    
-    // Add active class to first file by default
+
     if (files[0]) {
         files[0].classList.add('active');
     }
 }
 
-// Files Functionality moved to finder.js (initializeFiles)
-
-// WiFi Dropdown Functionality
 function initializeWiFiDropdown() {
     const wifiIcon = document.getElementById('wifiIcon');
     const wifiDropdown = document.getElementById('wifiDropdown');
@@ -1691,12 +1663,11 @@ function initializeWiFiDropdown() {
     wifiIcon.addEventListener('click', (e) => {
         e.stopPropagation();
         wifiDropdown.classList.toggle('show');
-        // Close control center if open
+        
         const controlCenter = document.getElementById('controlCenter');
         if (controlCenter) controlCenter.classList.remove('show');
     });
-    
-    // Close dropdown when clicking outside
+
     document.addEventListener('click', (e) => {
         if (!wifiDropdown.contains(e.target) && !wifiIcon.contains(e.target)) {
             wifiDropdown.classList.remove('show');
@@ -1704,7 +1675,6 @@ function initializeWiFiDropdown() {
     }, true);
 }
 
-// Fullscreen Functionality
 function initializeFullscreen() {
     const fullscreenIcon = document.getElementById('fullscreenIcon');
     
@@ -1714,8 +1684,7 @@ function initializeFullscreen() {
         e.stopPropagation();
         toggleFullscreen();
     });
-    
-    // Update icon when fullscreen state changes
+
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
@@ -1727,7 +1696,7 @@ function toggleFullscreen() {
     
     if (!document.fullscreenElement && !document.webkitFullscreenElement && 
         !document.mozFullScreenElement && !document.msFullscreenElement) {
-        // Enter fullscreen
+        
         if (elem.requestFullscreen) {
             elem.requestFullscreen();
         } else if (elem.webkitRequestFullscreen) {
@@ -1738,7 +1707,7 @@ function toggleFullscreen() {
             elem.msRequestFullscreen();
         }
     } else {
-        // Exit fullscreen
+        
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
@@ -1761,16 +1730,15 @@ function updateFullscreenIcon() {
     const svg = fullscreenIcon.querySelector('svg');
     if (svg) {
         if (isFullscreen) {
-            // Exit fullscreen icon (compress/minimize icon)
+            
             svg.innerHTML = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>';
         } else {
-            // Enter fullscreen icon (expand icon)
+            
             svg.innerHTML = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
         }
     }
 }
 
-// Control Center Functionality
 function initializeControlCenter() {
     const controlIcon = document.getElementById('controlCenterIcon');
     const controlCenter = document.getElementById('controlCenter');
@@ -1780,19 +1748,17 @@ function initializeControlCenter() {
     controlIcon.addEventListener('click', (e) => {
         e.stopPropagation();
         controlCenter.classList.toggle('show');
-        // Close wifi dropdown if open
+        
         const wifiDropdown = document.getElementById('wifiDropdown');
         if (wifiDropdown) wifiDropdown.classList.remove('show');
     });
-    
-    // Close when clicking outside
+
     document.addEventListener('click', (e) => {
         if (!controlCenter.contains(e.target) && !controlIcon.contains(e.target)) {
             controlCenter.classList.remove('show');
         }
     }, true);
-    
-    // Brightness control
+
     const brightnessSlider = document.getElementById('brightnessSlider');
     if (brightnessSlider) {
         brightnessSlider.addEventListener('input', (e) => {
@@ -1803,19 +1769,15 @@ function initializeControlCenter() {
             }
         });
     }
-    
-    // Volume control (visual feedback)
+
     const volumeSlider = document.getElementById('volumeSlider');
     if (volumeSlider) {
         volumeSlider.addEventListener('input', (e) => {
             const volume = e.target.value;
-            // visual-only volume control; logging removed
-            // Note: Browser cannot control system volume for security reasons
-            // This provides visual feedback only
+
         });
     }
-    
-    // Control items toggle
+
     const controlItems = controlCenter.querySelectorAll('.control-item');
     controlItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -1839,37 +1801,33 @@ function initializeControlCenter() {
     });
 }
 
-// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    // Alt + T for terminal
+    
     if (e.altKey && e.key === 't') {
         e.preventDefault();
         openApp('terminal');
     }
-    // Alt + F for files
+    
     if (e.altKey && e.key === 'f') {
         e.preventDefault();
         openApp('files');
     }
-    // Alt + A for about
+    
     if (e.altKey && e.key === 'a') {
         e.preventDefault();
         openApp('about');
     }
 });
 
-// System Info Modal
 window.showSystemInfo = function() {
-    // Remove existing modal if any
+    
     const existing = document.getElementById('systemInfoModal');
     if (existing) existing.remove();
-    
-    // Get system information
+
     const browserInfo = getBrowserInfo();
     const screenInfo = `${window.screen.width} × ${window.screen.height}`;
     const viewportInfo = `${window.innerWidth} × ${window.innerHeight}`;
-    
-    // Create modal
+
     const modal = document.createElement('div');
     modal.id = 'systemInfoModal';
     modal.className = 'system-info-modal';
@@ -1912,8 +1870,7 @@ window.showSystemInfo = function() {
     `;
     
     document.body.appendChild(modal);
-    
-    // Close handlers
+
     const closeBtn = modal.querySelector('.system-info-close');
     closeBtn.addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => {
@@ -1925,8 +1882,7 @@ window.showSystemInfo = function() {
             document.removeEventListener('keydown', escHandler);
         }
     });
-    
-    // Animate in
+
     setTimeout(() => modal.classList.add('show'), 10);
 };
 

@@ -1,19 +1,16 @@
-// Apple menu (mac-icon) JS extracted from script.js
-// This file should be included after script.js in index.html
+
 
 (function() {
-    // Helper: temporarily clear the `title` attribute on an element while running a function,
-    // then restore it after a short delay. This prevents native browser tooltips from appearing
-    // or lingering when UI actions (like lock) are triggered.
+
     function withTemporaryTitleClear(el, fn, restoreMs = 480) {
         if (!el) return fn && fn();
         try {
             const had = el.hasAttribute('title');
             const orig = had ? el.getAttribute('title') : null;
             if (had) el.removeAttribute('title');
-            // run the action
+            
             if (typeof fn === 'function') fn();
-            // restore after a short timeout to avoid showing native tooltip
+            
             setTimeout(() => {
                 try {
                     if (had && orig !== null) el.setAttribute('title', orig);
@@ -24,7 +21,6 @@
         }
     }
 
-    // Utility: clear stored/original title and optionally restore it
     function clearStoredTitle(el) {
         if (!el) return;
         try {
@@ -57,7 +53,7 @@
         const appleMenu = document.getElementById('appleMenu');
         if (!appleMenu) return;
         appleMenu.setAttribute('aria-hidden', 'true');
-        // Fade out with opacity, then hide
+        
         appleMenu.style.transition = 'opacity 0.35s cubic-bezier(.4,0,.2,1)';
         appleMenu.style.opacity = '0';
         appleMenu.style.visibility = 'hidden';
@@ -77,7 +73,6 @@
         try { removeFloatingTooltipsContaining('Lock Screen'); } catch (e) {}
     }
 
-    // --- Main Apple menu logic ---
     document.addEventListener('DOMContentLoaded', function() {
         const appleLogo = document.querySelector('.apple-logo');
         const appleMenu = document.getElementById('appleMenu');
@@ -110,8 +105,7 @@
                     openAppleMenu();
                 }
             });
-            
-            // Handle Get Info click
+
             appleMenu.addEventListener('pointerdown', (ev) => {
                 const getInfoEl = ev.target.closest && ev.target.closest('#appleGetInfo');
                 if (getInfoEl) {
@@ -123,21 +117,19 @@
                     closeAppleMenu();
                     return;
                 }
-                
-                // Handle About Me click
+
                 const aboutMeEl = ev.target.closest && ev.target.closest('#appleAboutMe');
                 if (aboutMeEl) {
                     ev.preventDefault();
                     ev.stopPropagation();
-                    // Open About window with profile information
+                    
                     if (typeof openApp === 'function') {
                         openApp('about');
                     }
                     closeAppleMenu();
                     return;
                 }
-                
-                // Handle Lock Screen click
+
                 const lockEl = ev.target.closest && ev.target.closest('#appleLockScreen');
                 if (!lockEl) return;
                 ev.preventDefault();
