@@ -1,4 +1,4 @@
-/* WiFi Dropdown Menu */
+
 .wifi-dropdown {
     position: absolute;
     top: 28px;
@@ -179,7 +179,6 @@
 
 .wifi-settings:hover { background: rgba(255, 255, 255, 0.08); }
 
-/* Mobile Responsive Styles */
 @media (max-width: 720px) {
     .wifi-dropdown {
         position: fixed;
