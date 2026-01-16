@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/control-center.css">
     <link rel="stylesheet" href="css/apple-menu.css">
     <link rel="stylesheet" href="css/visitor-widget.css">
+    <link rel="stylesheet" href="css/puzzle.css">
     
     <script src="https://cdn.jsdelivr.net/npm/stackblur-canvas@2.6.0/dist/stackblur.min.js"></script>
 </head>
@@ -873,6 +874,23 @@
         </div>
     </template>
 
+    <template id="puzzle-template">
+        <div class="window-content" style="background: #1e1e1e; color: #e0e0e0; height: 100%; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; gap: 20px; font-size: 14px;">
+                    <div>Moves: <span id="puzzleMoves" style="font-weight: 600; color: #4a9eff;">0</span></div>
+                    <div>Time: <span id="puzzleTime" style="font-weight: 600; color: #4a9eff;">0s</span></div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="puzzleShuffle" class="preview-btn" style="padding: 6px 12px; font-size: 12px;">Shuffle</button>
+                    <button id="puzzleSolve" class="preview-btn" style="padding: 6px 12px; font-size: 12px;">Solve</button>
+                </div>
+            </div>
+            <div id="puzzleBoard" style="display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 450px; aspect-ratio: 1; margin: 0 auto;"></div>
+            <div style="text-align: center; margin-top: 16px; color: #888; font-size: 13px;">Click tiles adjacent to the empty space to move them</div>
+        </div>
+    </template>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
         try { console.log('[INLINE] index.html inline script executed'); window.__inline_marker = true; } catch (e) {}
@@ -880,6 +898,7 @@
     <script src="js/apple-menu.js"></script>
     <script src="js/visitorWidget.js"></script>
     <script src="js/finder.js"></script>
+    <script src="js/puzzle.js"></script>
     <script src="js/script.js"></script>
     <script src="js/wallpapers.js"></script>
 </body>

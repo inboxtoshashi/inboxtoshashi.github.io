@@ -172,16 +172,23 @@
                     { src: 'images/doc-app/docker.png', name: 'Docker' },
                     { src: 'images/doc-app/calender.png', name: 'Calendar', app: 'calendar' },
                     { src: 'images/doc-app/safari.png', name: 'Safari', app: 'safari', href: 'https://www.google.com' },
-                    { src: 'images/icons/spy.png', name: 'Spy', app: 'spy' }
+                    { src: 'images/icons/spy.png', name: 'Spy', app: 'spy' },
+                    { src: 'images/icons/puzzle.png', name: 'Puzzle Game', app: 'puzzle', emoji: '🧩' }
                 ];
 
                 apps.forEach(a => {
                     const tile = document.createElement('div');
                     tile.className = 'doc-tile app-compact';
+                    
+                    let iconHtml = '';
+                    if (a.emoji) {
+                        iconHtml = `<div class="doc-icon" style="font-size: 48px; display: flex; align-items: center; justify-content: center;">${a.emoji}</div>`;
+                    } else {
+                        iconHtml = `<div class="doc-icon"><img src="${a.src}" alt="${a.name}" style="object-fit:contain;border-radius:8px;"></div>`;
+                    }
+                    
                     tile.innerHTML = `
-                        <div class="doc-icon">
-                            <img src="${a.src}" alt="${a.name}" style="object-fit:contain;border-radius:8px;">
-                        </div>
+                        ${iconHtml}
                         <div class="doc-name">${a.name}</div>
                     `;
 

@@ -25,6 +25,7 @@ const appConfigs = {
     ,calendar: { title: '📅 Calendar', width: 520, height: 420 }
     ,spy: { title: '🕵️ Spy', width: 760, height: 460 }
     ,trash: { title: 'Trash', width: 650, height: 500 }
+    ,puzzle: { title: '🧩 Puzzle', width: 540, height: 580 }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -544,7 +545,8 @@ function addToDock(window) {
         'about': 'images/icons/user.png',
         'contact': 'images/icons/email.png',
         'settings': 'images/icons/settings.png',
-        'trash': 'images/doc-app/bin.png'
+        'trash': 'images/doc-app/bin.png',
+        'puzzle': '🧩'
     };
     
     const iconPath = iconMap[appName] || 'images/icons/app.png';
@@ -553,7 +555,12 @@ function addToDock(window) {
     dockIcon.className = 'dock-app dock-app-minimized';
     dockIcon.dataset.app = appName;
     dockIcon.title = `${appTitle} (minimized)`;
-    dockIcon.innerHTML = `<div class="app-icon"><img src="${iconPath}" alt="${appName}" style="width: 48px; height: 48px; object-fit: contain;" /></div>`;
+    
+    if (appName === 'puzzle') {
+        dockIcon.innerHTML = `<div class="app-icon" style="font-size: 32px; display: flex; align-items: center; justify-content: center;">🧩</div>`;
+    } else {
+        dockIcon.innerHTML = `<div class="app-icon"><img src="${iconPath}" alt="${appName}" style="width: 48px; height: 48px; object-fit: contain;" /></div>`;
+    }
 
     dockIcon.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -692,17 +699,13 @@ function createWindow(appName, config) {
     let left, top;
     
     if (isMobile) {
-        
         left = 0;
         top = 48;
     } else {
-        
-        const centerX = Math.max(12, Math.floor((vw - w) / 2));
-        const centerY = Math.max(12, Math.floor((vh - h) / 2));
         const cascadeIndex = (windows && windows.length) ? windows.length : (window.__openWindowCascadeIndex || 0);
-        const cascadeOffset = Math.min(200, cascadeIndex * 45);
-        left = Math.max(12, Math.min(centerX + cascadeOffset, vw - w - 12));
-        top = Math.max(48, Math.min(centerY + cascadeOffset, vh - h - 48));
+        const cascadeOffset = Math.min(200, cascadeIndex * 30);
+        left = Math.max(12, Math.min(50 + cascadeOffset, vw - w - 12));
+        top = Math.max(48, Math.min(80 + cascadeOffset, vh - h - 48));
     }
 
     winEl.style.width = w + 'px';
@@ -991,6 +994,8 @@ function loadWindowContent(window, appName) {
         initializePreview(window);
     } else if (appName === 'trash') {
         initializeTrash(window);
+    } else if (appName === 'puzzle') {
+        initializePuzzle(window);
     } else if (appName === 'about') {
         
         try { initializeAbout(window); } catch (e) {}
